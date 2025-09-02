@@ -273,7 +273,7 @@ input:focus {
     display: flex;
     justify-content: flex-start;
     flex-wrap: wrap;
-    gap: 12px
+    gap: 0px 20px;
   }
 
   .tabla td {

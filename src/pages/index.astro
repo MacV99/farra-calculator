@@ -134,7 +134,7 @@ const desc =
 							name="nombre"
 							type="text"
 							required
-							placeholder="Ej: Cerveza 330 ml"
+							placeholder="Ej: Cerveza"
 						/>
 					</div>
 					<div class="field">
@@ -648,7 +648,7 @@ const desc =
 				productos = [
 					{
 						id: uuid(),
-						nombre: "Cerveza 330 ml",
+						nombre: "Cerveza",
 						precioUnidadCOP: 5000,
 						cantidad: 24,
 						abv: 4.5,
@@ -656,7 +656,7 @@ const desc =
 					},
 					{
 						id: uuid(),
-						nombre: "Ron 750 ml",
+						nombre: "Ron",
 						precioUnidadCOP: 60000,
 						cantidad: 2,
 						abv: 35,
@@ -664,7 +664,7 @@ const desc =
 					},
 					{
 						id: uuid(),
-						nombre: "Vino 750 ml",
+						nombre: "Aguardiente",
 						precioUnidadCOP: 45000,
 						cantidad: 2,
 						abv: 12,
@@ -739,11 +739,11 @@ const desc =
 					tr.dataset.id = p.id;
 					tr.innerHTML = `
       <td data-label="Nombre"><span class="nombre">${p.nombre}</span></td>
-      <td data-label="Precio x unidad">${fmtCOP.format(p.precioUnidadCOP)}</td>
+      <td data-label="Precio/u">${fmtCOP.format(p.precioUnidadCOP)}</td>
       <td data-label="Cantidad">${p.cantidad}</td>
-      <td data-label="%ABV">${p.abv}%</td>
-      <td data-label="ml/unidad">${p.mlUnidad}</td>
-      <td data-label="Costo línea">${fmtCOP.format(costoLinea)}</td>
+      <td data-label="% Alc.">${p.abv}%</td>
+      <td data-label="ml/u">${p.mlUnidad}</td>
+      <td data-label="Costo">${fmtCOP.format(costoLinea)}</td>
       <td data-label="Acciones">
         <div class="actions-row">
           <button type="button" class="btn secondary btn-editar" aria-label="Editar"><i class="bi bi-pen-fill" aria-hidden="true"></i></button>
