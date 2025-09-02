@@ -12,7 +12,6 @@
   --maxw: 1200px;
   --gap: 16px;
 
-  /* Ajusta estas dos para el ancho en desktop */
   --col-personas: calc(28% - var(--gap)/2);
   --col-productos: calc(72% - var(--gap)/2);
 }
@@ -32,6 +31,10 @@ body {
   background: linear-gradient(180deg, #0c0f14 0%, #0f1115 100%);
   color: var(--text);
   line-height: 1.4;
+}
+
+body.modal-open {
+  overflow: hidden
 }
 
 .container {
@@ -59,7 +62,7 @@ body {
 #btn-limpiar {
   color: var(--danger);
   border-color: #ff4d5040;
-  background-color: #ff4d5005;
+  background-color: #ff4d5005
 }
 
 /* Layout principal con Flex */
@@ -70,39 +73,34 @@ body {
 }
 
 #estado-vacio {
-  margin-top: 12px;
+  margin-top: 12px
 }
 
 .grid>.card {
-  flex: 1 1 100%;
+  flex: 1 1 100%
 }
 
 .tabla td span {
-  text-transform: capitalize;
+  text-transform: capitalize
 }
 
 @media (min-width: 960px) {
-
-  /* 1: Evento actual (más pequeño), 2: Productos (más ancho) */
   .grid>.card:nth-child(1) {
-    flex: 0 1 var(--col-personas);
+    flex: 0 1 var(--col-personas)
   }
 
   .grid>.card:nth-child(2) {
-    flex: 1 1 var(--col-productos);
+    flex: 1 1 var(--col-productos)
   }
 
-  /* 3 y 4 a media columna cada una */
   .grid>.card:nth-child(3) {
-    flex-basis: calc(50% - var(--gap)/2);
+    flex-basis: calc(50% - var(--gap)/2)
   }
 
   .grid>.card:nth-child(4) {
-    flex-basis: calc(50% - var(--gap)/2);
+    flex-basis: calc(50% - var(--gap)/2)
   }
 }
-
-
 
 .card {
   background: var(--card);
@@ -115,10 +113,10 @@ body {
 h2 {
   margin: 0 0 12px 0;
   font-size: 1.25rem;
-  text-transform: capitalize;
+  text-transform: capitalize
 }
 
-/* Form + fields */
+/* Formularios */
 .form-row {
   display: flex;
   flex-wrap: wrap;
@@ -174,7 +172,7 @@ input:focus {
 /* Botones */
 .btn {
   background-color: #e8ebf105;
-  border: solid 1px #e8ebf140;
+  border: 1px solid #e8ebf140;
   color: var(--text);
   font-weight: 700;
   padding: 10px 14px;
@@ -187,20 +185,20 @@ input:focus {
 }
 
 .btn.secondary {
-  border: solid 1px #e8ebf140;
-  background-color: #e8ebf105;
+  border: 1px solid #e8ebf140;
+  background-color: #e8ebf105
 }
 
 .btn.success {
-  border: solid 1px #2ecc7040;
+  border: 1px solid #2ecc7040;
   background-color: #2ecc7005;
-  color: var(--accent-2);
+  color: var(--accent-2)
 }
 
 .btn.danger {
   background: none;
   color: #ff4d50;
-  border: solid 1px #ff4d5040;
+  border: 1px solid #ff4d5040
 }
 
 .btn.small {
@@ -253,7 +251,7 @@ input:focus {
 
 .actions-row {
   display: flex;
-  gap: 8px;
+  gap: 8px
 }
 
 @media (max-width: 720px) {
@@ -283,11 +281,11 @@ input:focus {
     padding: 6px 0;
     display: flex;
     flex-direction: column;
-    width: fit-content;
+    width: fit-content
   }
 
   .tabla td:last-child {
-    width: 100%;
+    width: 100%
   }
 
   .tabla td::before {
@@ -295,10 +293,8 @@ input:focus {
     display: block;
     font-size: .8rem;
     color: var(--muted);
-    margin-bottom: 2px;
+    margin-bottom: 2px
   }
-
-
 }
 
 /* Resultados */
@@ -312,13 +308,13 @@ input:focus {
   background: #0e1117;
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 10px 14px;
+  padding: 10px 14px
 }
 
 .resultado .box strong {
   display: block;
   font-size: 1.1rem;
-  margin-bottom: 4px;
+  margin-bottom: 4px
 }
 
 .resultado .line {
@@ -330,7 +326,7 @@ input:focus {
 }
 
 strong {
-  text-transform: capitalize;
+  text-transform: capitalize
 }
 
 .resultado .label {
@@ -338,7 +334,7 @@ strong {
   font-size: .95rem
 }
 
-/* Accesibilidad */
+/* A11y */
 .sr-only {
   position: absolute !important;
   height: 1px;
@@ -348,7 +344,7 @@ strong {
   white-space: nowrap;
   border: 0;
   padding: 0;
-  margin: -1px;
+  margin: -1px
 }
 
 /* Eventos */
@@ -362,7 +358,7 @@ strong {
   border-radius: 12px;
   margin-top: 8px;
   background: #0e1117;
-  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  transition: border-color .15s, box-shadow .15s, background .15s
 }
 
 .evento-item .meta {
@@ -372,12 +368,12 @@ strong {
 
 .evento-actions {
   display: flex;
-  gap: 8px;
+  gap: 8px
 }
 
 .evento-item.active {
   border-color: #e8ebf185;
-  background: #e8ebf102;
+  background: #e8ebf102
 }
 
 /* Modales */
@@ -396,13 +392,31 @@ strong {
   display: flex
 }
 
+#dialog-close,
+#modal-overlay #modal-cerrar,
+.modal .small {
+  position: absolute;
+  right: 12px;
+  top: 10px;
+}
+
+header .container {
+  padding: 12px;
+}
+
+
 .modal {
   width: min(680px, 100%);
   background: #12151c;
   border: 1px solid var(--border);
   border-radius: 16px;
   box-shadow: var(--shadow);
-  padding: 16px
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  position: relative;
 }
 
 .modal-head {
@@ -412,10 +426,9 @@ strong {
   margin-bottom: 8px
 }
 
-
 .btn i,
 .btn svg {
-  pointer-events: none;
+  pointer-events: none
 }
 
 .head-row {
@@ -423,5 +436,36 @@ strong {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 12px
+}
+
+/* Acciones del modal genérico */
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 8px
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  background: #12151c;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .18s ease, transform .18s ease;
+  z-index: 1100;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0)
 }

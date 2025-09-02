@@ -21,12 +21,11 @@ const desc =
 		<header class="hero">
 			<div class="container">
 				<h1>{title}</h1>
-				<!-- <p>{desc}</p> -->
 			</div>
 		</header>
 
 		<main class="container grid">
-			<!-- Evento actual (h2 dinámico con el NOMBRE del evento) -->
+			<!-- Evento actual (h2 = NOMBRE del evento) -->
 			<section class="card" aria-labelledby="evento-nombre-heading">
 				<h2 id="evento-nombre-heading">Borrador sin guardar</h2>
 				<div id="evento-fecha" class="muted" style="margin:-6px 0 10px 0;">
@@ -46,9 +45,6 @@ const desc =
 							required
 							aria-describedby="personas-help"
 						/>
-						<!-- <small id="personas-help" class="muted"
-							>Debe ser un entero ≥ 1</small
-						> -->
 					</div>
 					<button type="button" id="btn-limpiar" class="btn secondary"
 						>Limpiar todo</button
@@ -111,10 +107,9 @@ const desc =
 			</section>
 
 			<section class="sr-only" aria-live="polite" id="live-region"></section>
-			<p id="mensajes" class="muted" role="status" aria-live="polite"></p>
 		</main>
 
-		<!-- Modales (sin cambios) -->
+		<!-- Modal: Agregar producto -->
 		<div id="modal-overlay" class="modal-overlay" aria-hidden="true">
 			<div
 				class="modal"
@@ -128,7 +123,7 @@ const desc =
 						type="button"
 						id="modal-cerrar"
 						class="btn secondary small"
-						aria-label="Cerrar">Cerrar</button
+						aria-label="Cerrar"><i class="bi bi-x"></i></button
 					>
 				</div>
 				<form id="form-producto" class="grid-form" novalidate>
@@ -167,7 +162,7 @@ const desc =
 						/>
 					</div>
 					<div class="field">
-						<label for="p-abv">% ABV (0–100)</label>
+						<label for="p-abv">% Alcohol (0–100)</label>
 						<input
 							id="p-abv"
 							name="abv"
@@ -205,6 +200,7 @@ const desc =
 			</div>
 		</div>
 
+		<!-- Modal: Editar producto -->
 		<div id="modal-edit-overlay" class="modal-overlay" aria-hidden="true">
 			<div
 				class="modal"
@@ -218,7 +214,7 @@ const desc =
 						type="button"
 						id="modal-edit-cerrar"
 						class="btn secondary small"
-						aria-label="Cerrar">Cerrar</button
+						aria-label="Cerrar"><i class="bi bi-x"></i></button
 					>
 				</div>
 				<form id="form-producto-editar" class="grid-form" novalidate>
@@ -268,7 +264,7 @@ const desc =
 						/>
 					</div>
 					<div class="actions">
-						<button type="submit" class="btn success">Guardar cambios</button>
+						<button type="submit" class="btn secundary">Guardar cambios</button>
 					</div>
 					<p id="edit-errores" class="error" role="alert" aria-live="polite">
 					</p>
@@ -276,6 +272,7 @@ const desc =
 			</div>
 		</div>
 
+		<!-- Modal: Crear evento -->
 		<div id="modal-create-overlay" class="modal-overlay" aria-hidden="true">
 			<div
 				class="modal"
@@ -289,7 +286,7 @@ const desc =
 						type="button"
 						id="modal-create-cerrar"
 						class="btn secondary small"
-						aria-label="Cerrar">Cerrar</button
+						aria-label="Cerrar"><i class="bi bi-x"></i></button
 					>
 				</div>
 				<form id="form-evento-crear" class="grid-form" novalidate>
@@ -302,13 +299,46 @@ const desc =
 						<input id="ce-fecha" type="date" />
 					</div>
 					<div class="actions">
-						<button type="submit" class="btn success">Crear</button>
+						<button type="submit" class="btn secondary">Crear</button>
 					</div>
 					<p id="create-errores" class="error" role="alert" aria-live="polite">
 					</p>
 				</form>
 			</div>
 		</div>
+
+		<!-- Modal genérico: Confirmar / Guardar o descartar -->
+		<div id="dialog-overlay" class="modal-overlay" aria-hidden="true">
+			<div
+				class="modal"
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="dialog-title"
+			>
+				<div class="modal-head">
+					<h3 id="dialog-title">Confirmar</h3>
+					<button
+						type="button"
+						id="dialog-close"
+						class="btn secondary small"
+						aria-label="Cerrar"><i class="bi bi-x"></i></button
+					>
+				</div>
+				<p id="dialog-message" class="muted" style="margin:0 0 8px 0;"></p>
+				<div class="modal-actions">
+					<button type="button" id="dialog-extra" class="btn hidden"
+						>Descartar</button
+					>
+					<!-- <button type="button" id="dialog-cancel" class="btn secondary">Cancelar</button> -->
+					<button type="button" id="dialog-confirm" class="btn"
+						>Confirmar</button
+					>
+				</div>
+			</div>
+		</div>
+
+		<!-- Toast -->
+		<div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
 
 		<script type="module">
 			import "/src/scripts/app.ts";
