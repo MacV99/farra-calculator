@@ -1,16 +1,317 @@
 ---
-
+import "../styles/main.css";
+const title = "Farra Calculator";
+const desc =
+	"Calcula costos y consumo de alcohol puro por persona. Guarda tus eventos y cárgalos cuando quieras.";
 ---
 
-<html lang="en">
+<html lang="es">
 	<head>
 		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<meta name="viewport" content="	width=device-width, initial-scale=1" />
+		<link rel="icon" type="image/png" href="/favicon.png" />
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+		/>
+		<title>{title}</title>
+		<meta name="description" content={desc} />
 	</head>
 	<body>
-		<h1>Astro</h1>
+		<header class="hero">
+			<div class="container">
+				<h1>{title}</h1>
+				<!-- <p>{desc}</p> -->
+			</div>
+		</header>
+
+		<main class="container grid">
+			<!-- Evento actual (h2 dinámico con el NOMBRE del evento) -->
+			<section class="card" aria-labelledby="evento-nombre-heading">
+				<h2 id="evento-nombre-heading">Borrador sin guardar</h2>
+				<div id="evento-fecha" class="muted" style="margin:-6px 0 10px 0;">
+					—
+				</div>
+
+				<form id="form-personas" class="form-row" novalidate>
+					<div class="field">
+						<label for="personas">Número de personas</label>
+						<input
+							id="personas"
+							name="personas"
+							type="number"
+							inputmode="numeric"
+							min="1"
+							step="1"
+							required
+							aria-describedby="personas-help"
+						/>
+						<!-- <small id="personas-help" class="muted"
+							>Debe ser un entero ≥ 1</small
+						> -->
+					</div>
+					<button type="button" id="btn-limpiar" class="btn secondary"
+						>Limpiar todo</button
+					>
+				</form>
+			</section>
+
+			<!-- Productos -->
+			<section class="card" aria-labelledby="productos-title">
+				<div class="head-row">
+					<h2 id="productos-title">Productos</h2>
+					<button type="button" id="btn-abrir-modal" class="btn">Agregar</button
+					>
+				</div>
+
+				<div id="productos-wrapper">
+					<table class="tabla" id="tabla-productos">
+						<thead>
+							<tr>
+								<th>Nombre</th>
+								<th>Precio/u</th>
+								<th>Cantidad</th>
+								<th>% Alc</th>
+								<th>ml/u</th>
+								<th>Costo</th>
+								<th>Acciones</th>
+							</tr>
+						</thead>
+						<tbody id="tbody-productos"></tbody>
+					</table>
+					<div id="estado-vacio" class="muted hidden">
+						Aún no hay productos. Agrega el primero para empezar.
+					</div>
+				</div>
+			</section>
+
+			<!-- Resultados -->
+			<section class="card" aria-labelledby="resultados-title">
+				<h2 id="resultados-title">Resultados</h2>
+				<div id="resultado" class="resultado" aria-live="polite"></div>
+			</section>
+
+			<!-- Eventos -->
+			<section class="card" aria-labelledby="eventos-title">
+				<div class="head-row">
+					<h2 id="eventos-title">Eventos</h2>
+					<div class="actions-row">
+						<button type="button" id="btn-crear-evento" class="btn"
+							>Crear</button
+						>
+						<button
+							type="button"
+							id="btn-guardar-cambios"
+							class="btn success"
+							disabled>Guardar</button
+						>
+					</div>
+				</div>
+				<div id="eventos-lista" class="eventos-lista"></div>
+			</section>
+
+			<section class="sr-only" aria-live="polite" id="live-region"></section>
+			<p id="mensajes" class="muted" role="status" aria-live="polite"></p>
+		</main>
+
+		<!-- Modales (sin cambios) -->
+		<div id="modal-overlay" class="modal-overlay" aria-hidden="true">
+			<div
+				class="modal"
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="modal-title"
+			>
+				<div class="modal-head">
+					<h3 id="modal-title">Agregar producto</h3>
+					<button
+						type="button"
+						id="modal-cerrar"
+						class="btn secondary small"
+						aria-label="Cerrar">Cerrar</button
+					>
+				</div>
+				<form id="form-producto" class="grid-form" novalidate>
+					<div class="field">
+						<label for="p-nombre">Nombre *</label>
+						<input
+							id="p-nombre"
+							name="nombre"
+							type="text"
+							required
+							placeholder="Ej: Cerveza 330 ml"
+						/>
+					</div>
+					<div class="field">
+						<label for="p-precio">Precio por unidad (COP)</label>
+						<input
+							id="p-precio"
+							name="precio"
+							type="number"
+							min="0"
+							step="1"
+							inputmode="numeric"
+							placeholder="5000"
+						/>
+					</div>
+					<div class="field">
+						<label for="p-cantidad">Cantidad (unidades)</label>
+						<input
+							id="p-cantidad"
+							name="cantidad"
+							type="number"
+							min="0"
+							step="1"
+							inputmode="numeric"
+							placeholder="24"
+						/>
+					</div>
+					<div class="field">
+						<label for="p-abv">% ABV (0–100)</label>
+						<input
+							id="p-abv"
+							name="abv"
+							type="number"
+							min="0"
+							max="100"
+							step="0.1"
+							inputmode="decimal"
+							placeholder="4.5"
+						/>
+					</div>
+					<div class="field">
+						<label for="p-ml">ml por unidad</label>
+						<input
+							id="p-ml"
+							name="ml"
+							type="number"
+							min="0"
+							step="1"
+							inputmode="numeric"
+							placeholder="330"
+						/>
+					</div>
+					<div class="actions">
+						<button type="submit" class="btn">Agregar</button>
+					</div>
+					<p
+						id="producto-errores"
+						class="error"
+						role="alert"
+						aria-live="polite"
+					>
+					</p>
+				</form>
+			</div>
+		</div>
+
+		<div id="modal-edit-overlay" class="modal-overlay" aria-hidden="true">
+			<div
+				class="modal"
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="modal-edit-title"
+			>
+				<div class="modal-head">
+					<h3 id="modal-edit-title">Editar producto</h3>
+					<button
+						type="button"
+						id="modal-edit-cerrar"
+						class="btn secondary small"
+						aria-label="Cerrar">Cerrar</button
+					>
+				</div>
+				<form id="form-producto-editar" class="grid-form" novalidate>
+					<div class="field">
+						<label for="ep-nombre">Nombre *</label>
+						<input id="ep-nombre" type="text" required />
+					</div>
+					<div class="field">
+						<label for="ep-precio">Precio por unidad (COP)</label>
+						<input
+							id="ep-precio"
+							type="number"
+							min="0"
+							step="1"
+							inputmode="numeric"
+						/>
+					</div>
+					<div class="field">
+						<label for="ep-cantidad">Cantidad (unidades)</label>
+						<input
+							id="ep-cantidad"
+							type="number"
+							min="0"
+							step="1"
+							inputmode="numeric"
+						/>
+					</div>
+					<div class="field">
+						<label for="ep-abv">% ABV (0–100)</label>
+						<input
+							id="ep-abv"
+							type="number"
+							min="0"
+							max="100"
+							step="0.1"
+							inputmode="decimal"
+						/>
+					</div>
+					<div class="field">
+						<label for="ep-ml">ml por unidad</label>
+						<input
+							id="ep-ml"
+							type="number"
+							min="0"
+							step="1"
+							inputmode="numeric"
+						/>
+					</div>
+					<div class="actions">
+						<button type="submit" class="btn success">Guardar cambios</button>
+					</div>
+					<p id="edit-errores" class="error" role="alert" aria-live="polite">
+					</p>
+				</form>
+			</div>
+		</div>
+
+		<div id="modal-create-overlay" class="modal-overlay" aria-hidden="true">
+			<div
+				class="modal"
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="modal-create-title"
+			>
+				<div class="modal-head">
+					<h3 id="modal-create-title">Crear evento</h3>
+					<button
+						type="button"
+						id="modal-create-cerrar"
+						class="btn secondary small"
+						aria-label="Cerrar">Cerrar</button
+					>
+				</div>
+				<form id="form-evento-crear" class="grid-form" novalidate>
+					<div class="field">
+						<label for="ce-nombre">Nombre del evento</label>
+						<input id="ce-nombre" type="text" placeholder="Cumple de Laura" />
+					</div>
+					<div class="field">
+						<label for="ce-fecha">Fecha</label>
+						<input id="ce-fecha" type="date" />
+					</div>
+					<div class="actions">
+						<button type="submit" class="btn success">Crear</button>
+					</div>
+					<p id="create-errores" class="error" role="alert" aria-live="polite">
+					</p>
+				</form>
+			</div>
+		</div>
+
+		<script type="module">
+			import "/src/scripts/app.ts";
+		</script>
 	</body>
 </html>
