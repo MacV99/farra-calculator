@@ -1,5 +1,7 @@
-// @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig } from "astro/config";
 
-// https://astro.build/config
-export default defineConfig({});
+export default defineConfig({
+  output: "static",   // sitio 100% estático
+  // NO uses "base" en Netlify si estás en raíz del dominio
+  // site: "https://tu-sitio.netlify.app" // (opcional)
+});
