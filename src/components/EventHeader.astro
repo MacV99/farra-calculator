@@ -4,7 +4,7 @@
 
 <section class="card" aria-labelledby="evento-nombre-heading">
   <div class="head-row">
-    <h2 id="evento-nombre-heading">Borrador sin guardar</h2>
+    <h2 id="evento-nombre-heading">Evento: Borrador sin guardar</h2>
     <button
       type="button"
       id="btn-rename-event"
@@ -81,9 +81,9 @@
     const evts = window.App.loadEventos();
     const id = window.App.getEventoActivoId();
     const actual = evts.find((e) => e.id === id);
-    h2.textContent = actual
-      ? actual.nombreEvento || "(Sin evento)"
-      : "Borrador sin guardar";
+    h2.textContent =
+      "Evento: " +
+      (actual ? actual.nombreEvento || "(Sin evento)" : "Borrador sin guardar");
   }
 
   function renderPersonas() {
