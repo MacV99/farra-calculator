@@ -1,0 +1,38 @@
+---
+
+---
+
+<section class="card" aria-labelledby="resultados-title">
+  <h2 id="resultados-title">Resultados</h2>
+  <div id="resultado" class="resultado" aria-live="polite"></div>
+</section>
+
+<script type="module" is:inline>
+  const el = document.getElementById("resultado");
+  const live = document.getElementById("live-region");
+  function render() {
+    const res = window.App.calcularResumen(
+      window.App.getPersonas(),
+      window.App.getProductos(),
+    );
+    el.innerHTML = `
+      <div class="box">
+        <strong>Costos</strong>
+        <div class="line"><span class="label">Total</span><span>${window.App.fmtCOP.format(res.costoTotalCOP)}</span></div>
+        <div class="line"><span class="label">Por persona</span><span>${window.App.fmtCOP.format(res.costoPorPersonaCOP)}</span></div>
+      </div>
+      <div class="box">
+        <strong>Alcohol puro</strong>
+        <div class="line"><span class="label">Total</span><span>${res.alcoholPuroTotalMl} ml</span></div>
+        <div class="line"><span class="label">Por persona</span><span>${res.alcoholPuroPorPersonaMl} ml</span></div>
+      </div>
+      <div class="box">
+        <strong>Volumen total</strong>
+        <div class="line"><span class="label">Total</span><span>${res.volumenTotalMl} ml · ${res.volumenTotalL} L</span></div>
+      </div>
+    `;
+    live.textContent = `Actualizado: total ${window.App.fmtCOP.format(res.costoTotalCOP)}, por persona ${window.App.fmtCOP.format(res.costoPorPersonaCOP)}, alcohol por persona ${res.alcoholPuroPorPersonaMl} ml.`;
+  }
+  window.addEventListener("app:state", render);
+  window.addEventListener("DOMContentLoaded", render);
+</script>

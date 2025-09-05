@@ -11,7 +11,6 @@
   --radius: 16px;
   --maxw: 1200px;
   --gap: 16px;
-
   --col-personas: calc(28% - var(--gap)/2);
   --col-productos: calc(72% - var(--gap)/2);
 }
@@ -65,7 +64,6 @@ body.modal-open {
   background-color: #ff4d5005
 }
 
-/* Layout principal con Flex */
 .grid {
   display: flex;
   flex-wrap: wrap;
@@ -116,7 +114,6 @@ h2 {
   text-transform: capitalize
 }
 
-/* Formularios */
 .form-row {
   display: flex;
   flex-wrap: wrap;
@@ -151,7 +148,6 @@ input:focus {
   box-shadow: 0 0 0 2px rgba(58, 168, 255, .2)
 }
 
-/* Grid-form -> Flex */
 .grid-form {
   display: flex;
   flex-wrap: wrap;
@@ -169,7 +165,6 @@ input:focus {
   flex: 1 1 100%
 }
 
-/* Botones */
 .btn {
   background-color: #e8ebf105;
   border: 1px solid #e8ebf140;
@@ -220,7 +215,6 @@ input:focus {
   display: none
 }
 
-/* Tabla */
 .tabla {
   width: 100%;
   border-collapse: collapse;
@@ -297,7 +291,6 @@ input:focus {
   }
 }
 
-/* Resultados */
 .resultado {
   display: flex;
   flex-direction: column;
@@ -334,7 +327,6 @@ strong {
   font-size: .95rem
 }
 
-/* A11y */
 .sr-only {
   position: absolute !important;
   height: 1px;
@@ -347,7 +339,6 @@ strong {
   margin: -1px
 }
 
-/* Eventos */
 .evento-item {
   display: flex;
   gap: 12px;
@@ -376,7 +367,6 @@ strong {
   background: #e8ebf102
 }
 
-/* Modales */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -403,7 +393,6 @@ strong {
 header .container {
   padding: 12px;
 }
-
 
 .modal {
   width: min(680px, 100%);
@@ -439,7 +428,6 @@ header .container {
   margin-bottom: 12px
 }
 
-/* Acciones del modal genérico */
 .modal-actions {
   display: flex;
   gap: 8px;
@@ -448,7 +436,6 @@ header .container {
   margin-top: 8px
 }
 
-/* Toast */
 .toast {
   position: fixed;
   right: 16px;
@@ -468,4 +455,21 @@ header .container {
 .toast.show {
   opacity: 1;
   transform: translateY(0)
+}
+
+.pair {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  flex: 1 1 100%;
+}
+
+@media (min-width: 960px) {
+  .pair {
+    flex-direction: row
+  }
+
+  .pair>.card {
+    flex: 1 1 calc(50% - var(--gap)/2)
+  }
 }

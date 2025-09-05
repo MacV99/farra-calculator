@@ -1,0 +1,17 @@
+---
+
+---
+
+<div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
+
+<script type="module" is:inline>
+  const t = document.getElementById("toast");
+  let timer = null;
+  function showToast(msg) {
+    t.textContent = msg;
+    t.classList.add("show");
+    if (timer) window.clearTimeout(timer);
+    timer = window.setTimeout(() => t.classList.remove("show"), 1200);
+  }
+  window.toast = showToast;
+</script>

@@ -1,0 +1,181 @@
+---
+
+---
+
+<section class="card" aria-labelledby="eventos-title">
+  <div class="head-row">
+    <h2 id="eventos-title">Eventos</h2>
+    <div class="actions-row">
+      <button type="button" id="btn-crear-evento" class="btn">Crear</button>
+    </div>
+  </div>
+  <div id="eventos-lista" class="eventos-lista"></div>
+
+  <div id="modal-create-overlay" class="modal-overlay" aria-hidden="true">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-create-title"
+    >
+      <div class="modal-head">
+        <h3 id="modal-create-title">Crear evento</h3>
+        <button
+          type="button"
+          id="modal-create-cerrar"
+          class="btn secondary small"
+          aria-label="Cerrar"
+        >
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+      <form id="form-evento-crear" class="grid-form" novalidate>
+        <div class="field">
+          <label for="ce-nombre">Nombre del evento</label>
+          <input id="ce-nombre" type="text" placeholder="Cumple de Laura" />
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn secondary">Crear</button>
+        </div>
+        <p id="create-errores" class="error" role="alert" aria-live="polite">
+        </p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script type="module" is:inline>
+  const lista = document.getElementById("eventos-lista");
+  const btnCrear = document.getElementById("btn-crear-evento");
+  const overlay = document.getElementById("modal-create-overlay");
+  const btnClose = document.getElementById("modal-create-cerrar");
+  const formCrear = document.getElementById("form-evento-crear");
+  const ceNombre = document.getElementById("ce-nombre");
+  const createErr = document.getElementById("create-errores");
+  let forceOpen = false;
+
+  function renderLista() {
+    const evts = window.App.loadEventos();
+    const activo = window.App.getEventoActivoId();
+    lista.innerHTML = evts.length
+      ? ""
+      : `<p class="muted">No hay eventos guardados.</p>`;
+    for (const e of evts) {
+      const isActive = activo === e.id ? "active" : "";
+      lista.innerHTML += `
+        <div class="evento-item ${isActive}" data-id="${e.id}">
+          <div class="meta">
+            <strong>${e.nombreEvento || "(Sin título)"}</strong>
+            <span class="muted">Total: ${window.App.fmtCOP.format(e.resumen.costoTotalCOP)} | ${e.personas}</span>
+          </div>
+          <div class="evento-actions">
+            <button type="button" class="btn secondary btn-cargar">Abrir</button>
+            <button type="button" class="btn danger btn-borrar" aria-label="Eliminar"><i class="bi bi-trash3-fill"></i></button>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  function openCreate(f = false) {
+    forceOpen = f;
+    ceNombre.value = "";
+    createErr.textContent = "";
+    overlay.classList.add("open");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+    if (forceOpen) btnClose.style.display = "none";
+    else btnClose.style.display = "";
+    ceNombre.focus();
+  }
+
+  function closeCreate() {
+    if (forceOpen) return;
+    overlay.classList.remove("open");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+    btnCrear.focus();
+  }
+
+  btnCrear.addEventListener("click", () => openCreate(false));
+  btnClose.addEventListener("click", closeCreate);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay && !forceOpen) closeCreate();
+  });
+  window.addEventListener("create-event:force", () => openCreate(true));
+
+  formCrear.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const nombreEvento = ceNombre.value.trim();
+    window.App.setPersonas(1);
+    window.App.setProductos([]);
+    const resumen = window.App.calcularResumen(
+      window.App.getPersonas(),
+      window.App.getProductos(),
+    );
+    const evt = {
+      id: window.App.uuid(),
+      nombreEvento,
+      personas: window.App.getPersonas(),
+      productos: [],
+      resumen,
+    };
+    const evts = window.App.loadEventos();
+    evts.unshift(evt);
+    window.App.saveEventos(evts);
+    window.App.setEventoActivo(evt.id);
+    renderLista();
+    window.dispatchEvent(new CustomEvent("app:state"));
+    window.dispatchEvent(new CustomEvent("app:event"));
+    window.toast("Evento creado");
+    forceOpen = false;
+    btnClose.style.display = "";
+    closeCreate();
+  });
+
+  lista.addEventListener("click", async (e) => {
+    const target = e.target;
+    const item = target.closest(".evento-item");
+    if (!item) return;
+    const id = item.dataset.id;
+    const evts = window.App.loadEventos();
+    const found = evts.find((x) => x.id === id);
+    if (!found) return;
+    if (target.closest(".btn-cargar")) {
+      window.App.setEventoActivo(found.id);
+      window.App.setPersonas(found.personas);
+      window.App.setProductos(structuredClone(found.productos));
+      renderLista();
+      window.dispatchEvent(new CustomEvent("app:state"));
+      window.dispatchEvent(new CustomEvent("app:event"));
+      window.toast("Evento abierto");
+      return;
+    }
+    if (target.closest(".btn-borrar")) {
+      const res = await window.dialogOpen({
+        title: "Eliminar evento",
+        message: "¿Eliminar este evento? Esta acción no se puede deshacer.",
+        confirmText: "Eliminar",
+      });
+      if (res !== "confirm") return;
+      const nuevos = evts.filter((x) => x.id !== id);
+      window.App.saveEventos(nuevos);
+      if (window.App.getEventoActivoId() === id)
+        window.App.setEventoActivo(null);
+      renderLista();
+      window.dispatchEvent(new CustomEvent("app:event"));
+      window.toast("Evento eliminado");
+      if (window.App.loadEventos().length === 0) openCreate(true);
+      return;
+    }
+  });
+
+  window.addEventListener("event:list", renderLista);
+  window.addEventListener("app:event", renderLista);
+  window.addEventListener("DOMContentLoaded", () => {
+    renderLista();
+    const evts = window.App.loadEventos();
+    const activo = window.App.getEventoActivoId();
+    if (!evts.length && !activo) openCreate(true);
+  });
+</script>

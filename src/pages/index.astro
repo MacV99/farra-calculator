@@ -1,5 +1,12 @@
 ---
 import "../styles/main.css";
+import AppHeader from "../components/AppHeader.astro";
+import EventHeader from "../components/EventHeader.astro";
+import ProductsSection from "../components/ProductsSection.astro";
+import ResultsSection from "../components/ResultsSection.astro";
+import EventsSection from "../components/EventsSection.astro";
+import DialogOverlay from "../components/DialogOverlay.astro";
+import Toast from "../components/Toast.astro";
 const title = "Farra Calculator";
 const desc =
 	"Calcula costos y consumo de alcohol puro por persona. Guarda tus eventos y cárgalos cuando quieras.";
@@ -18,424 +25,97 @@ const desc =
 		<meta name="description" content={desc} />
 	</head>
 	<body>
-		<header class="hero">
-			<div class="container">
-				<h1>{title}</h1>
-			</div>
-		</header>
+		<AppHeader title={title} />
 
 		<main class="container grid">
-			<section class="card" aria-labelledby="evento-nombre-heading">
-				<div class="head-row">
-					<h2 id="evento-nombre-heading">Borrador sin guardar</h2>
-					<button
-						type="button"
-						id="btn-rename-event"
-						class="btn small secondary"
-						title="Renombrar"
-					>
-						<i class="bi bi-pencil-square"></i>
-					</button>
-				</div>
+			<EventHeader />
+			<ProductsSection />
 
-				<form id="form-personas" class="form-row" novalidate>
-					<div class="field">
-						<label for="personas">Número de personas</label>
-						<input
-							id="personas"
-							name="personas"
-							type="number"
-							inputmode="numeric"
-							min="1"
-							step="1"
-							required
-							aria-describedby="personas-help"
-						/>
-					</div>
-					<button type="button" id="btn-limpiar" class="btn secondary"
-						>Limpiar todo</button
-					>
-				</form>
-			</section>
-
-			<section class="card" aria-labelledby="productos-title">
-				<div class="head-row">
-					<h2 id="productos-title">Productos</h2>
-					<button type="button" id="btn-abrir-modal" class="btn">Agregar</button
-					>
-				</div>
-
-				<div id="productos-wrapper">
-					<table class="tabla" id="tabla-productos">
-						<thead>
-							<tr>
-								<th>Nombre</th>
-								<th>Precio/u</th>
-								<th>Cantidad</th>
-								<th>% Alc</th>
-								<th>ml/u</th>
-								<th>Costo</th>
-								<th>Acciones</th>
-							</tr>
-						</thead>
-						<tbody id="tbody-productos"></tbody>
-					</table>
-					<div id="estado-vacio" class="muted hidden">
-						Aún no hay productos. Agrega el primero para empezar.
-					</div>
-				</div>
-			</section>
-
-			<section class="card" aria-labelledby="resultados-title">
-				<h2 id="resultados-title">Resultados</h2>
-				<div id="resultado" class="resultado" aria-live="polite"></div>
-			</section>
-
-			<section class="card" aria-labelledby="eventos-title">
-				<div class="head-row">
-					<h2 id="eventos-title">Eventos</h2>
-					<div class="actions-row">
-						<button type="button" id="btn-crear-evento" class="btn"
-							>Crear</button
-						>
-					</div>
-				</div>
-				<div id="eventos-lista" class="eventos-lista"></div>
-			</section>
+			<div class="pair">
+				<ResultsSection />
+				<EventsSection />
+			</div>
 
 			<section class="sr-only" aria-live="polite" id="live-region"></section>
 		</main>
 
-		<div id="modal-overlay" class="modal-overlay" aria-hidden="true">
-			<div
-				class="modal"
-				role="dialog"
-				aria-modal="true"
-				aria-labelledby="modal-title"
-			>
-				<div class="modal-head">
-					<h3 id="modal-title">Agregar producto</h3>
-					<button
-						type="button"
-						id="modal-cerrar"
-						class="btn secondary small"
-						aria-label="Cerrar"
-					>
-						<i class="bi bi-x"></i>
-					</button>
-				</div>
-				<form id="form-producto" class="grid-form" novalidate>
-					<div class="field">
-						<label for="p-nombre">Nombre *</label>
-						<input
-							id="p-nombre"
-							name="nombre"
-							type="text"
-							required
-							placeholder="Ej: Cerveza"
-						/>
-					</div>
-					<div class="field">
-						<label for="p-precio">Precio por unidad (COP)</label>
-						<input
-							id="p-precio"
-							name="precio"
-							type="number"
-							min="0"
-							step="1"
-							inputmode="numeric"
-							placeholder="5000"
-						/>
-					</div>
-					<div class="field">
-						<label for="p-cantidad">Cantidad (unidades)</label>
-						<input
-							id="p-cantidad"
-							name="cantidad"
-							type="number"
-							min="0"
-							step="1"
-							inputmode="numeric"
-							placeholder="24"
-						/>
-					</div>
-					<div class="field">
-						<label for="p-abv">% Alcohol (0–100)</label>
-						<input
-							id="p-abv"
-							name="abv"
-							type="number"
-							min="0"
-							max="100"
-							step="0.1"
-							inputmode="decimal"
-							placeholder="4.5"
-						/>
-					</div>
-					<div class="field">
-						<label for="p-ml">ml por unidad</label>
-						<input
-							id="p-ml"
-							name="ml"
-							type="number"
-							min="0"
-							step="1"
-							inputmode="numeric"
-							placeholder="330"
-						/>
-					</div>
-					<div class="actions">
-						<button type="submit" class="btn">Agregar</button>
-					</div>
-					<p
-						id="producto-errores"
-						class="error"
-						role="alert"
-						aria-live="polite"
-					>
-					</p>
-				</form>
-			</div>
-		</div>
-
-		<div id="modal-edit-overlay" class="modal-overlay" aria-hidden="true">
-			<div
-				class="modal"
-				role="dialog"
-				aria-modal="true"
-				aria-labelledby="modal-edit-title"
-			>
-				<div class="modal-head">
-					<h3 id="modal-edit-title">Editar producto</h3>
-					<button
-						type="button"
-						id="modal-edit-cerrar"
-						class="btn secondary small"
-						aria-label="Cerrar"
-					>
-						<i class="bi bi-x"></i>
-					</button>
-				</div>
-				<form id="form-producto-editar" class="grid-form" novalidate>
-					<div class="field">
-						<label for="ep-nombre">Nombre *</label>
-						<input id="ep-nombre" type="text" required />
-					</div>
-					<div class="field">
-						<label for="ep-precio">Precio por unidad (COP)</label>
-						<input
-							id="ep-precio"
-							type="number"
-							min="0"
-							step="1"
-							inputmode="numeric"
-						/>
-					</div>
-					<div class="field">
-						<label for="ep-cantidad">Cantidad (unidades)</label>
-						<input
-							id="ep-cantidad"
-							type="number"
-							min="0"
-							step="1"
-							inputmode="numeric"
-						/>
-					</div>
-					<div class="field">
-						<label for="ep-abv">% ABV (0–100)</label>
-						<input
-							id="ep-abv"
-							type="number"
-							min="0"
-							max="100"
-							step="0.1"
-							inputmode="decimal"
-						/>
-					</div>
-					<div class="field">
-						<label for="ep-ml">ml por unidad</label>
-						<input
-							id="ep-ml"
-							type="number"
-							min="0"
-							step="1"
-							inputmode="numeric"
-						/>
-					</div>
-					<div class="actions">
-						<button type="submit" class="btn secondary">Guardar cambios</button>
-					</div>
-					<p id="edit-errores" class="error" role="alert" aria-live="polite">
-					</p>
-				</form>
-			</div>
-		</div>
-
-		<div id="modal-create-overlay" class="modal-overlay" aria-hidden="true">
-			<div
-				class="modal"
-				role="dialog"
-				aria-modal="true"
-				aria-labelledby="modal-create-title"
-			>
-				<div class="modal-head">
-					<h3 id="modal-create-title">Crear evento</h3>
-					<button
-						type="button"
-						id="modal-create-cerrar"
-						class="btn secondary small"
-						aria-label="Cerrar"
-					>
-						<i class="bi bi-x"></i>
-					</button>
-				</div>
-				<form id="form-evento-crear" class="grid-form" novalidate>
-					<div class="field">
-						<label for="ce-nombre">Nombre del evento</label>
-						<input id="ce-nombre" type="text" placeholder="Cumple de Laura" />
-					</div>
-					<div class="actions">
-						<button type="submit" class="btn secondary">Crear</button>
-					</div>
-					<p id="create-errores" class="error" role="alert" aria-live="polite">
-					</p>
-				</form>
-			</div>
-		</div>
-
-		<div id="modal-rename-overlay" class="modal-overlay" aria-hidden="true">
-			<div
-				class="modal"
-				role="dialog"
-				aria-modal="true"
-				aria-labelledby="modal-rename-title"
-			>
-				<div class="modal-head">
-					<h3 id="modal-rename-title">Renombrar evento</h3>
-					<button
-						type="button"
-						id="modal-rename-cerrar"
-						class="btn secondary small"
-						aria-label="Cerrar"
-					>
-						<i class="bi bi-x"></i>
-					</button>
-				</div>
-				<form id="form-evento-rename" class="grid-form" novalidate>
-					<div class="field">
-						<label for="rn-nombre">Nuevo nombre</label>
-						<input id="rn-nombre" type="text" placeholder="Mi evento" />
-					</div>
-					<div class="actions">
-						<button type="submit" class="btn secondary">Guardar</button>
-					</div>
-					<p id="rename-errores" class="error" role="alert" aria-live="polite">
-					</p>
-				</form>
-			</div>
-		</div>
-
-		<div id="dialog-overlay" class="modal-overlay" aria-hidden="true">
-			<div
-				class="modal"
-				role="dialog"
-				aria-modal="true"
-				aria-labelledby="dialog-title"
-			>
-				<div class="modal-head">
-					<h3 id="dialog-title">Confirmar</h3>
-					<button
-						type="button"
-						id="dialog-close"
-						class="btn secondary small"
-						aria-label="Cerrar"
-					>
-						<i class="bi bi-x"></i>
-					</button>
-				</div>
-				<p id="dialog-message" class="muted" style="margin:0 0 8px 0;"></p>
-				<div class="modal-actions">
-					<button type="button" id="dialog-extra" class="btn hidden"
-						>Descartar</button
-					>
-					<button type="button" id="dialog-confirm" class="btn success"
-						>Confirmar</button
-					>
-				</div>
-			</div>
-		</div>
-
-		<div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
+		<DialogOverlay />
+		<Toast />
 	</body>
 </html>
 
-<script>
-	type Producto = {
-		id: string;
-		nombre: string;
-		precioUnidadCOP: number;
-		cantidad: number;
-		abv: number;
-		mlUnidad: number;
-	};
-
-	type Resumen = {
-		costoTotalCOP: number;
-		costoPorPersonaCOP: number;
-		volumenTotalMl: number;
-		volumenTotalL: number;
-		alcoholPuroTotalMl: number;
-		alcoholPuroPorPersonaMl: number;
-	};
-
-	type Evento = {
-		id: string;
-		nombreEvento: string;
-		personas: number;
-		productos: Producto[];
-		resumen: Resumen;
-	};
-
+<script type="module" is:inline>
 	const LS = {
 		personas: "fiesta.personas",
 		productos: "fiesta.productos",
 		eventos: "fiesta.eventos",
 		eventoActivoId: "fiesta.eventoActivoId",
-	} as const;
-
+	};
 	const fmtCOP = new Intl.NumberFormat("es-CO", {
 		style: "currency",
 		currency: "COP",
 		maximumFractionDigits: 0,
 	});
-
-	const $ = <T extends HTMLElement>(sel: string) =>
-		document.querySelector<T>(sel)!;
-
-	let personas = 1;
-	let productos: Producto[] = [];
-	let eventoActivoId: string | null = null;
-	let editingId: string | null = null;
-	let lastFocusSel: string | null = null;
-	let firstRunRequireEvent = false;
-
-	let toastTimer: number | null = null;
-	function showToast(msg: string) {
-		const t = $("#toast");
-		t.textContent = msg;
-		t.classList.add("show");
-		if (toastTimer) window.clearTimeout(toastTimer);
-		toastTimer = window.setTimeout(() => t.classList.remove("show"), 1200);
-	}
-
-	const uuid = () =>
-		typeof crypto !== "undefined" && "randomUUID" in crypto
+	function uuid() {
+		return typeof crypto !== "undefined" && "randomUUID" in crypto
 			? crypto.randomUUID()
 			: "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
-
-	const n = (v: any) => Number(v ?? 0);
-
-	function calcularResumen(pers: number, items: Producto[]): Resumen {
+	}
+	function loadEventos() {
+		try {
+			return JSON.parse(localStorage.getItem(LS.eventos) || "[]");
+		} catch {
+			return [];
+		}
+	}
+	function saveEventos(evts) {
+		localStorage.setItem(LS.eventos, JSON.stringify(evts));
+	}
+	function getEventoActivoId() {
+		return localStorage.getItem(LS.eventoActivoId);
+	}
+	function setEventoActivo(id) {
+		if (id) localStorage.setItem(LS.eventoActivoId, id);
+		else localStorage.removeItem(LS.eventoActivoId);
+	}
+	function getPersonas() {
+		return Math.max(
+			1,
+			parseInt(localStorage.getItem(LS.personas) || "1", 10) || 1,
+		);
+	}
+	function setPersonas(val) {
+		localStorage.setItem(LS.personas, String(Math.max(1, val || 1)));
+		autoSaveCurrent();
+	}
+	function getProductos() {
+		try {
+			return JSON.parse(localStorage.getItem(LS.productos) || "[]");
+		} catch {
+			return [];
+		}
+	}
+	function setProductos(arr) {
+		localStorage.setItem(LS.productos, JSON.stringify(arr || []));
+		autoSaveCurrent();
+	}
+	function addProducto(p) {
+		const arr = getProductos();
+		arr.push(p);
+		setProductos(arr);
+	}
+	function updateProducto(id, data) {
+		const arr = getProductos();
+		const idx = arr.findIndex((x) => x.id === id);
+		if (idx === -1) return;
+		arr[idx] = { ...arr[idx], ...data };
+		setProductos(arr);
+	}
+	function removeProducto(id) {
+		const arr = getProductos().filter((x) => x.id !== id);
+		setProductos(arr);
+	}
+	function calcularResumen(pers, items) {
 		const costo_total = items.reduce(
 			(acc, p) => acc + p.precioUnidadCOP * p.cantidad,
 			0,
@@ -449,733 +129,54 @@ const desc =
 			0,
 		);
 		const costo_por_persona = pers > 0 ? costo_total / pers : 0;
-		const ml_alcohol_puro_por_persona =
-			pers > 0 ? alcohol_puro_total_ml / pers : 0;
-		const volumen_total_litros = volumen_total_ml / 1000;
+		const ml_por_persona = pers > 0 ? alcohol_puro_total_ml / pers : 0;
+		const litros = volumen_total_ml / 1000;
 		return {
 			costoTotalCOP: Math.round(costo_total),
 			costoPorPersonaCOP: Math.round(costo_por_persona),
 			volumenTotalMl: Math.round(volumen_total_ml),
-			volumenTotalL: +volumen_total_litros.toFixed(2),
+			volumenTotalL: +litros.toFixed(2),
 			alcoholPuroTotalMl: Math.round(alcohol_puro_total_ml),
-			alcoholPuroPorPersonaMl: Math.round(ml_alcohol_puro_por_persona),
+			alcoholPuroPorPersonaMl: Math.round(ml_por_persona),
 		};
 	}
-
-	function loadEventos(): Evento[] {
-		try {
-			return JSON.parse(localStorage.getItem(LS.eventos) || "[]");
-		} catch {
-			return [];
-		}
-	}
-	function saveEventos(evts: Evento[]) {
-		localStorage.setItem(LS.eventos, JSON.stringify(evts));
-	}
-	function setEventoActivo(id: string | null) {
-		eventoActivoId = id;
-		if (id) localStorage.setItem(LS.eventoActivoId, id);
-		else localStorage.removeItem(LS.eventoActivoId);
-		renderTituloEventoActual();
-	}
-	function persistEstadoActual() {
-		localStorage.setItem(LS.personas, String(personas));
-		localStorage.setItem(LS.productos, JSON.stringify(productos));
-	}
-
 	function autoSaveCurrent() {
-		if (!eventoActivoId) {
-			persistEstadoActual();
-			return;
-		}
+		const id = getEventoActivoId();
+		if (!id) return;
 		const evts = loadEventos();
-		const idx = evts.findIndex((e) => e.id === eventoActivoId);
-		const resumen = calcularResumen(personas, productos);
+		const idx = evts.findIndex((e) => e.id === id);
 		if (idx === -1) return;
 		evts[idx] = {
 			...evts[idx],
-			personas,
-			productos: structuredClone(productos),
-			resumen,
+			personas: getPersonas(),
+			productos: structuredClone(getProductos()),
+			resumen: calcularResumen(getPersonas(), getProductos()),
 		};
 		saveEventos(evts);
 	}
-
-	function loadEstadoInicial() {
-		const activo = localStorage.getItem(LS.eventoActivoId);
-		if (activo) {
-			const evts = loadEventos();
-			const found = evts.find((e) => e.id === activo);
-			if (found) {
-				personas = found.personas;
-				productos = found.productos;
-				setEventoActivo(activo);
-				return;
-			} else {
-				setEventoActivo(null);
-			}
-		}
-		const pStr = localStorage.getItem(LS.personas);
-		const prodsStr = localStorage.getItem(LS.productos);
-		if (pStr && prodsStr) {
-			personas = Math.max(1, parseInt(pStr, 10) || 1);
-			try {
-				productos = JSON.parse(prodsStr) || [];
-			} catch {
-				productos = [];
-			}
-			return;
-		}
-		personas = 1;
-		productos = [];
-		firstRunRequireEvent = true;
-	}
-
-	function renderPersonas() {
-		($("#personas") as HTMLInputElement).value = String(personas);
-	}
-
-	function renderTituloEventoActual() {
-		const h2 = document.querySelector<HTMLHeadingElement>(
-			"#evento-nombre-heading",
-		)!;
-		const evts = loadEventos();
-		const actual = evts.find((e) => e.id === eventoActivoId);
-		h2.textContent = actual
-			? actual.nombreEvento || "(Sin evento)"
-			: "Borrador sin guardar";
-	}
-
-	function renderProductos() {
-		const tbody = $("#tbody-productos");
-		const vacio = $("#estado-vacio");
-		tbody.innerHTML = "";
-		productos.length === 0
-			? vacio.classList.remove("hidden")
-			: vacio.classList.add("hidden");
-		for (const p of productos) {
-			const costoLinea = p.precioUnidadCOP * p.cantidad;
-			const tr = document.createElement("tr");
-			tr.dataset.id = p.id;
-			tr.innerHTML = `
-        <td data-label="Nombre"><span class="nombre">${p.nombre}</span></td>
-        <td data-label="Precio/u">${fmtCOP.format(p.precioUnidadCOP)}</td>
-        <td data-label="Cantidad">${p.cantidad}</td>
-        <td data-label="% Alc.">${p.abv}%</td>
-        <td data-label="ml/u">${p.mlUnidad}</td>
-        <td data-label="Costo">${fmtCOP.format(costoLinea)}</td>
-        <td data-label="Acciones">
-          <div class="actions-row">
-            <button type="button" class="btn secondary btn-editar" aria-label="Editar"><i class="bi bi-pen-fill" aria-hidden="true"></i></button>
-            <button type="button" class="btn danger btn-eliminar" aria-label="Eliminar"><i class="bi bi-trash3-fill" aria-hidden="true"></i></button>
-          </div>
-        </td>
-      `;
-			tbody.appendChild(tr);
-		}
-	}
-
-	function renderResultados() {
-		const res = calcularResumen(personas, productos);
-		const el = $("#resultado");
-		el.innerHTML = `
-      <div class="box">
-        <strong>Costos</strong>
-        <div class="line"><span class="label">Total</span><span>${fmtCOP.format(res.costoTotalCOP)}</span></div>
-        <div class="line"><span class="label">Por persona</span><span>${fmtCOP.format(res.costoPorPersonaCOP)}</span></div>
-      </div>
-      <div class="box">
-        <strong>Alcohol puro</strong>
-        <div class="line"><span class="label">Total</span><span>${res.alcoholPuroTotalMl} ml</span></div>
-        <div class="line"><span class="label">Por persona</span><span>${res.alcoholPuroPorPersonaMl} ml</span></div>
-      </div>
-      <div class="box">
-        <strong>Volumen total</strong>
-        <div class="line"><span class="label">Total</span><span>${res.volumenTotalMl} ml · ${res.volumenTotalL} L</span></div>
-      </div>
-    `;
-		$("#live-region").textContent =
-			`Actualizado: total ${fmtCOP.format(res.costoTotalCOP)}, por persona ${fmtCOP.format(res.costoPorPersonaCOP)}, alcohol por persona ${res.alcoholPuroPorPersonaMl} ml.`;
-	}
-
-	function renderEventosLista() {
-		const cont = $("#eventos-lista");
-		const evts = loadEventos();
-		cont.innerHTML = evts.length
-			? ""
-			: `<p class="muted">No hay eventos guardados.</p>`;
-		for (const e of evts) {
-			const isActive = eventoActivoId === e.id ? "active" : "";
-			cont.innerHTML += `
-        <div class="evento-item ${isActive}" data-id="${e.id}">
-          <div class="meta">
-            <strong>${e.nombreEvento || "(Sin título)"}</strong>
-            <span class="muted">Total: ${fmtCOP.format(e.resumen.costoTotalCOP)} | ${e.personas}</span>
-          </div>
-          <div class="evento-actions">
-            <button type="button" class="btn secondary btn-cargar">Abrir</button>
-            <button type="button" class="btn danger btn-borrar" aria-label="Eliminar"><i class="bi bi-trash3-fill" aria-hidden="true"></i></button>
-          </div>
-        </div>
-      `;
-		}
-	}
-
-	function updateBodyScrollLock() {
-		const anyOpen = document.querySelectorAll(".modal-overlay.open").length > 0;
-		document.body.classList.toggle("modal-open", anyOpen);
-	}
-
-	const modalAdd = {
-		overlay: null as HTMLDivElement | null,
-		open() {
-			this.overlay = $("#modal-overlay") as HTMLDivElement;
-			this.overlay.classList.add("open");
-			this.overlay.setAttribute("aria-hidden", "false");
-			updateBodyScrollLock();
-			($("#p-nombre") as HTMLInputElement).focus();
-		},
-		close() {
-			if (!this.overlay) return;
-			this.overlay.classList.remove("open");
-			this.overlay.setAttribute("aria-hidden", "true");
-			updateBodyScrollLock();
-			($("#producto-errores") as HTMLElement).textContent = "";
-			(
-				["#p-nombre", "#p-precio", "#p-cantidad", "#p-abv", "#p-ml"] as const
-			).forEach((sel) => {
-				const el = $(sel) as HTMLInputElement;
-				el.value = "";
-			});
-			($("#btn-abrir-modal") as HTMLButtonElement).focus();
-		},
+	window.App = {
+		LS,
+		fmtCOP,
+		uuid,
+		loadEventos,
+		saveEventos,
+		getEventoActivoId,
+		setEventoActivo,
+		getPersonas,
+		setPersonas,
+		getProductos,
+		setProductos,
+		addProducto,
+		updateProducto,
+		removeProducto,
+		calcularResumen,
+		fmtCOP,
 	};
-
-	const modalEdit = {
-		overlay: null as HTMLDivElement | null,
-		open(id: string) {
-			editingId = id;
-			lastFocusSel = `tr[data-id="${id}"] .btn-editar`;
-			const p = productos.find((x) => x.id === id);
-			if (!p) return;
-			this.overlay = $("#modal-edit-overlay") as HTMLDivElement;
-			($("#ep-nombre") as HTMLInputElement).value = p.nombre;
-			($("#ep-precio") as HTMLInputElement).value = String(p.precioUnidadCOP);
-			($("#ep-cantidad") as HTMLInputElement).value = String(p.cantidad);
-			($("#ep-abv") as HTMLInputElement).value = String(p.abv);
-			($("#ep-ml") as HTMLInputElement).value = String(p.mlUnidad);
-			($("#edit-errores") as HTMLElement).textContent = "";
-			this.overlay.classList.add("open");
-			this.overlay.setAttribute("aria-hidden", "false");
-			updateBodyScrollLock();
-			($("#ep-nombre") as HTMLInputElement).focus();
-		},
-		close() {
-			if (!this.overlay) return;
-			this.overlay.classList.remove("open");
-			this.overlay.setAttribute("aria-hidden", "true");
-			updateBodyScrollLock();
-			($("#edit-errores") as HTMLElement).textContent = "";
-			if (lastFocusSel)
-				document.querySelector<HTMLButtonElement>(lastFocusSel)?.focus();
-			editingId = null;
-			lastFocusSel = null;
-		},
-	};
-
-	const modalCreate = {
-		overlay: null as HTMLDivElement | null,
-		open() {
-			this.overlay = $("#modal-create-overlay") as HTMLDivElement;
-			($("#ce-nombre") as HTMLInputElement).value = "";
-			($("#create-errores") as HTMLElement).textContent = "";
-			this.overlay.classList.add("open");
-			this.overlay.setAttribute("aria-hidden", "false");
-			updateBodyScrollLock();
-			($("#ce-nombre") as HTMLInputElement).focus();
-			if (firstRunRequireEvent) {
-				const closeBtn = $("#modal-create-cerrar") as HTMLButtonElement;
-				closeBtn.style.display = "none";
-			}
-		},
-		close() {
-			if (!this.overlay) return;
-			if (firstRunRequireEvent) return;
-			this.overlay.classList.remove("open");
-			this.overlay.setAttribute("aria-hidden", "true");
-			updateBodyScrollLock();
-			($("#btn-crear-evento") as HTMLButtonElement).focus();
-			const closeBtn = $("#modal-create-cerrar") as HTMLButtonElement;
-			closeBtn.style.display = "";
-		},
-	};
-
-	const modalRename = {
-		overlay: null as HTMLDivElement | null,
-		open() {
-			if (!eventoActivoId) {
-				showToast("Primero crea un evento");
-				modalCreate.open();
-				return;
-			}
-			this.overlay = $("#modal-rename-overlay") as HTMLDivElement;
-			const evts = loadEventos();
-			const evt = evts.find((e) => e.id === eventoActivoId);
-			($("#rn-nombre") as HTMLInputElement).value = evt?.nombreEvento || "";
-			($("#rename-errores") as HTMLElement).textContent = "";
-			this.overlay.classList.add("open");
-			this.overlay.setAttribute("aria-hidden", "false");
-			updateBodyScrollLock();
-			($("#rn-nombre") as HTMLInputElement).focus();
-		},
-		close() {
-			if (!this.overlay) return;
-			this.overlay.classList.remove("open");
-			this.overlay.setAttribute("aria-hidden", "true");
-			updateBodyScrollLock();
-			($("#btn-rename-event") as HTMLButtonElement).focus();
-		},
-	};
-
-	const dialog = {
-		open(opts: {
-			title: string;
-			message: string;
-			confirmText?: string;
-			cancelText?: string;
-			extraText?: string;
-		}): Promise<"confirm" | "cancel" | "extra"> {
-			const overlay = document.getElementById(
-				"dialog-overlay",
-			) as HTMLDivElement;
-			const title = document.getElementById("dialog-title") as HTMLElement;
-			const msg = document.getElementById("dialog-message") as HTMLElement;
-			const btnConfirm = document.getElementById(
-				"dialog-confirm",
-			) as HTMLButtonElement;
-			const btnCancel = document.getElementById(
-				"dialog-cancel",
-			) as HTMLButtonElement | null;
-			const btnExtra = document.getElementById(
-				"dialog-extra",
-			) as HTMLButtonElement;
-			const btnClose = document.getElementById(
-				"dialog-close",
-			) as HTMLButtonElement;
-			title.textContent = opts.title;
-			msg.textContent = opts.message;
-			btnConfirm.textContent = opts.confirmText ?? "Confirmar";
-			if (btnCancel) {
-				btnCancel.textContent = opts.cancelText ?? "Cancelar";
-				btnCancel.classList.remove("hidden");
-			}
-			if (opts.extraText) {
-				btnExtra.textContent = opts.extraText;
-				btnExtra.classList.remove("hidden");
-			} else {
-				btnExtra.classList.add("hidden");
-			}
-			overlay.classList.add("open");
-			overlay.setAttribute("aria-hidden", "false");
-			document.body.classList.add("modal-open");
-			btnConfirm.focus();
-			return new Promise((resolve) => {
-				const cleanup = () => {
-					overlay.classList.remove("open");
-					overlay.setAttribute("aria-hidden", "true");
-					document.body.classList.remove("modal-open");
-					btnConfirm.removeEventListener("click", onConfirm);
-					btnExtra.removeEventListener("click", onExtra);
-					btnClose.removeEventListener("click", onCancel);
-					overlay.removeEventListener("click", onOutside);
-					document.removeEventListener("keydown", onEsc);
-					if (btnCancel) btnCancel.removeEventListener("click", onCancel);
-				};
-				const onConfirm = () => {
-					cleanup();
-					resolve("confirm");
-				};
-				const onCancel = () => {
-					cleanup();
-					resolve("cancel");
-				};
-				const onExtra = () => {
-					cleanup();
-					resolve("extra");
-				};
-				const onOutside = (e: Event) => {
-					if (e.target === overlay) onCancel();
-				};
-				const onEsc = (e: KeyboardEvent) => {
-					if (e.key === "Escape") onCancel();
-				};
-				btnConfirm.addEventListener("click", onConfirm);
-				btnExtra.addEventListener("click", onExtra);
-				btnClose.addEventListener("click", onCancel);
-				overlay.addEventListener("click", onOutside);
-				document.addEventListener("keydown", onEsc);
-				if (btnCancel) btnCancel.addEventListener("click", onCancel);
-			});
-		},
-	};
-
-	function onAddProducto(e: Event) {
-		e.preventDefault();
-		if (!eventoActivoId) {
-			showToast("Primero crea un evento");
-			modalCreate.open();
-			return;
-		}
-		const nombre = ($("#p-nombre") as HTMLInputElement).value.trim();
-		const precio = n(($("#p-precio") as HTMLInputElement).value);
-		const cantidad = n(($("#p-cantidad") as HTMLInputElement).value);
-		const abv = n(($("#p-abv") as HTMLInputElement).value);
-		const ml = n(($("#p-ml") as HTMLInputElement).value);
-		const err = $("#producto-errores");
-		if (!nombre) {
-			err.textContent = "El nombre es obligatorio.";
-			return;
-		}
-		if (
-			precio < 0 ||
-			cantidad < 0 ||
-			ml < 0 ||
-			abv < 0 ||
-			abv > 100 ||
-			[precio, cantidad, ml, abv].some(Number.isNaN)
-		) {
-			err.textContent = "Revisa valores: no negativos, sin NaN y %ABV ≤ 100.";
-			return;
-		}
-		err.textContent = "";
-		productos.push({
-			id: uuid(),
-			nombre,
-			precioUnidadCOP: precio,
-			cantidad,
-			abv,
-			mlUnidad: ml,
-		});
-		persistEstadoActual();
-		autoSaveCurrent();
-		renderProductos();
-		renderResultados();
-		showToast("Guardado");
-		modalAdd.close();
-	}
-
-	function onEditProductoSubmit(e: Event) {
-		e.preventDefault();
-		if (!editingId) return;
-		const nombre = ($("#ep-nombre") as HTMLInputElement).value.trim();
-		const precio = n(($("#ep-precio") as HTMLInputElement).value);
-		const cantidad = n(($("#ep-cantidad") as HTMLInputElement).value);
-		const abv = n(($("#ep-abv") as HTMLInputElement).value);
-		const ml = n(($("#ep-ml") as HTMLInputElement).value);
-		const err = $("#edit-errores");
-		if (!nombre) {
-			err.textContent = "El nombre es obligatorio.";
-			return;
-		}
-		if (
-			precio < 0 ||
-			cantidad < 0 ||
-			ml < 0 ||
-			abv < 0 ||
-			abv > 100 ||
-			[precio, cantidad, ml, abv].some(Number.isNaN)
-		) {
-			err.textContent = "Revisa valores: no negativos, sin NaN y %ABV ≤ 100.";
-			return;
-		}
-		err.textContent = "";
-		const idx = productos.findIndex((p) => p.id === editingId);
-		if (idx === -1) {
-			modalEdit.close();
-			return;
-		}
-		productos[idx] = {
-			...productos[idx],
-			nombre,
-			precioUnidadCOP: precio,
-			cantidad,
-			abv,
-			mlUnidad: ml,
-		};
-		persistEstadoActual();
-		autoSaveCurrent();
-		renderProductos();
-		renderResultados();
-		showToast("Guardado");
-		modalEdit.close();
-	}
-
-	function onCrearEventoSubmit(e: Event) {
-		e.preventDefault();
-		const nombreEvento = ($("#ce-nombre") as HTMLInputElement).value.trim();
-		personas = 1;
-		productos = [];
-		persistEstadoActual();
-		renderPersonas();
-		renderProductos();
-		renderResultados();
-		const resumen = calcularResumen(personas, productos);
-		const evt: Evento = {
-			id: uuid(),
-			nombreEvento,
-			personas,
-			productos: [],
-			resumen,
-		};
+	document.addEventListener("keydown", () => {});
+	window.addEventListener("DOMContentLoaded", () => {
 		const evts = loadEventos();
-		evts.unshift(evt);
-		saveEventos(evts);
-		setEventoActivo(evt.id);
-		renderEventosLista();
-		showToast("Evento creado");
-		firstRunRequireEvent = false;
-		const closeBtn = $("#modal-create-cerrar") as HTMLButtonElement;
-		closeBtn.style.display = "";
-		modalCreate.close();
-	}
-
-	function onRenameEventoSubmit(e: Event) {
-		e.preventDefault();
-		if (!eventoActivoId) return;
-		const nombre = ($("#rn-nombre") as HTMLInputElement).value.trim();
-		const err = $("#rename-errores");
-		if (nombre.length === 0) {
-			err.textContent = "Ingresa un nombre.";
-			return;
-		}
-		const evts = loadEventos();
-		const idx = evts.findIndex((ev) => ev.id === eventoActivoId);
-		if (idx === -1) {
-			modalRename.close();
-			return;
-		}
-		evts[idx] = { ...evts[idx], nombreEvento: nombre };
-		saveEventos(evts);
-		renderTituloEventoActual();
-		renderEventosLista();
-		showToast("Nombre actualizado");
-		modalRename.close();
-	}
-
-	function onPersonasInput() {
-		if (!eventoActivoId) {
-			($("#personas") as HTMLInputElement).value = String(personas);
-			showToast("Primero crea un evento");
-			modalCreate.open();
-			return;
-		}
-		const val = Math.max(
-			1,
-			parseInt(($("#personas") as HTMLInputElement).value, 10) || 1,
-		);
-		personas = val;
-		persistEstadoActual();
-		autoSaveCurrent();
-		renderResultados();
-	}
-
-	function onTablaClick(e: Event) {
-		const target = e.target as HTMLElement;
-		const btn = target.closest("button");
-		if (!btn) return;
-		const tr = btn.closest("tr") as HTMLTableRowElement | null;
-		if (!tr) return;
-		const id = tr.dataset.id!;
-		const idx = productos.findIndex((x) => x.id === id);
-		if (idx === -1) return;
-		if (btn.classList.contains("btn-eliminar")) {
-			dialog
-				.open({
-					title: "Eliminar producto",
-					message: "¿Seguro que quieres eliminar este producto?",
-					confirmText: "Eliminar",
-					cancelText: "Cancelar",
-				})
-				.then((res) => {
-					if (res !== "confirm") return;
-					productos.splice(idx, 1);
-					persistEstadoActual();
-					autoSaveCurrent();
-					renderProductos();
-					renderResultados();
-					showToast("Eliminado");
-				});
-			return;
-		}
-		if (btn.classList.contains("btn-editar")) {
-			modalEdit.open(id);
-			return;
-		}
-	}
-
-	function onLimpiar() {
-		if (!eventoActivoId) {
-			showToast("Primero crea un evento");
-			modalCreate.open();
-			return;
-		}
-		dialog
-			.open({
-				title: "Limpiar todo",
-				message:
-					"Esto limpiará personas y productos actuales (no borra los eventos guardados).",
-				confirmText: "Sí, limpiar",
-				cancelText: "Cancelar",
-			})
-			.then((res) => {
-				if (res !== "confirm") return;
-				personas = 1;
-				productos = [];
-				persistEstadoActual();
-				autoSaveCurrent();
-				renderPersonas();
-				renderProductos();
-				renderResultados();
-				showToast("Limpio");
-			});
-	}
-
-	function onEventosClick(e: Event) {
-		const target = e.target as HTMLElement;
-		const item = target.closest(".evento-item") as HTMLElement | null;
-		if (!item) return;
-		const id = item.dataset.id!;
-		const evts = loadEventos();
-		const found = evts.find((x) => x.id === id);
-		if (!found) return;
-		if (target.closest(".btn-cargar")) {
-			personas = found.personas;
-			productos = structuredClone(found.productos);
-			setEventoActivo(found.id);
-			persistEstadoActual();
-			renderPersonas();
-			renderProductos();
-			renderResultados();
-			renderEventosLista();
-			showToast("Evento abierto");
-			return;
-		}
-		if (target.closest(".btn-borrar")) {
-			dialog
-				.open({
-					title: "Eliminar evento",
-					message: "¿Eliminar este evento? Esta acción no se puede deshacer.",
-					confirmText: "Eliminar",
-					cancelText: "Cancelar",
-				})
-				.then((res) => {
-					if (res !== "confirm") return;
-					const nuevos = evts.filter((x) => x.id !== id);
-					saveEventos(nuevos);
-					if (eventoActivoId === id) {
-						setEventoActivo(null);
-					}
-					renderEventosLista();
-					showToast("Evento eliminado");
-					if (loadEventos().length === 0) {
-						firstRunRequireEvent = true;
-						modalCreate.open();
-					}
-				});
-			return;
-		}
-	}
-
-	function init() {
-		loadEstadoInicial();
-		renderPersonas();
-		renderProductos();
-		renderResultados();
-		renderEventosLista();
-		renderTituloEventoActual();
-
-		$("#tabla-productos").addEventListener("click", onTablaClick);
-		$("#personas").addEventListener("input", onPersonasInput);
-		$("#btn-limpiar").addEventListener("click", onLimpiar);
-
-		$("#btn-abrir-modal").addEventListener("click", () => {
-			if (!eventoActivoId) {
-				showToast("Primero crea un evento");
-				modalCreate.open();
-				return;
-			}
-			modalAdd.open();
-		});
-		$("#modal-cerrar").addEventListener("click", () => modalAdd.close());
-		$("#modal-overlay").addEventListener("click", (e) => {
-			if (e.target === $("#modal-overlay")) modalAdd.close();
-		});
-		$("#form-producto").addEventListener("submit", onAddProducto);
-
-		$("#modal-edit-cerrar").addEventListener("click", () => modalEdit.close());
-		$("#modal-edit-overlay").addEventListener("click", (e) => {
-			if (e.target === $("#modal-edit-overlay")) modalEdit.close();
-		});
-		$("#form-producto-editar").addEventListener("submit", onEditProductoSubmit);
-
-		$("#btn-crear-evento").addEventListener("click", () => {
-			modalCreate.open();
-		});
-		$("#modal-create-cerrar").addEventListener("click", () =>
-			modalCreate.close(),
-		);
-		$("#modal-create-overlay").addEventListener("click", (e) => {
-			if (e.target === $("#modal-create-overlay") && !firstRunRequireEvent)
-				modalCreate.close();
-		});
-		$("#form-evento-crear").addEventListener("submit", onCrearEventoSubmit);
-
-		$("#btn-rename-event").addEventListener("click", () => modalRename.open());
-		$("#modal-rename-cerrar").addEventListener("click", () =>
-			modalRename.close(),
-		);
-		$("#modal-rename-overlay").addEventListener("click", (e) => {
-			if (e.target === $("#modal-rename-overlay")) modalRename.close();
-		});
-		$("#form-evento-rename").addEventListener("submit", onRenameEventoSubmit);
-
-		$("#eventos-lista").addEventListener("click", onEventosClick);
-
-		document.addEventListener("keydown", (e) => {
-			if (e.key !== "Escape") return;
-			const overlays = [
-				"#modal-edit-overlay",
-				"#modal-overlay",
-				"#modal-create-overlay",
-				"#modal-rename-overlay",
-				"#dialog-overlay",
-			];
-			for (const sel of overlays) {
-				const el = document.querySelector(sel) as HTMLElement | null;
-				if (el && el.classList.contains("open")) {
-					if (sel === "#modal-create-overlay" && firstRunRequireEvent) return;
-					sel === "#modal-edit-overlay"
-						? modalEdit.close()
-						: sel === "#modal-overlay"
-							? modalAdd.close()
-							: sel === "#modal-create-overlay"
-								? modalCreate.close()
-								: sel === "#modal-rename-overlay"
-									? modalRename.close()
-									: el.classList.remove("open");
-					if (sel === "#dialog-overlay") {
-						el.setAttribute("aria-hidden", "true");
-						updateBodyScrollLock();
-					}
-					return;
-				}
-			}
-		});
-
-		if (firstRunRequireEvent) {
-			modalCreate.open();
-		}
-	}
-
-	document.addEventListener("DOMContentLoaded", init);
+		const activo = getEventoActivoId();
+		if (!evts.length && !activo)
+			window.dispatchEvent(new CustomEvent("create-event:force"));
+	});
 </script>

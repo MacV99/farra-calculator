@@ -1,0 +1,84 @@
+---
+
+---
+
+<div id="dialog-overlay" class="modal-overlay" aria-hidden="true">
+  <div
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="dialog-title"
+  >
+    <div class="modal-head">
+      <h3 id="dialog-title">Confirmar</h3>
+      <button
+        type="button"
+        id="dialog-close"
+        class="btn secondary small"
+        aria-label="Cerrar"
+      >
+        <i class="bi bi-x"></i>
+      </button>
+    </div>
+    <p id="dialog-message" class="muted" style="margin:0 0 8px 0;"></p>
+    <div class="modal-actions">
+      <button type="button" id="dialog-extra" class="btn hidden"
+        >Descartar</button
+      >
+      <button type="button" id="dialog-confirm" class="btn success"
+        >Confirmar</button
+      >
+    </div>
+  </div>
+</div>
+
+<script type="module" is:inline>
+  const overlay = document.getElementById("dialog-overlay");
+  const title = document.getElementById("dialog-title");
+  const msg = document.getElementById("dialog-message");
+  const btnConfirm = document.getElementById("dialog-confirm");
+  const btnExtra = document.getElementById("dialog-extra");
+  const btnClose = document.getElementById("dialog-close");
+  let resolver = null;
+
+  function open(opts) {
+    title.textContent = opts.title;
+    msg.textContent = opts.message;
+    btnConfirm.textContent = opts.confirmText || "Confirmar";
+    if (opts.extraText) {
+      btnExtra.textContent = opts.extraText;
+      btnExtra.classList.remove("hidden");
+    } else {
+      btnExtra.classList.add("hidden");
+    }
+    overlay.classList.add("open");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+    btnConfirm.focus();
+    return new Promise((r) => {
+      resolver = r;
+    });
+  }
+
+  function close(result) {
+    overlay.classList.remove("open");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+    const r = resolver;
+    resolver = null;
+    if (r) r(result);
+  }
+
+  btnConfirm.addEventListener("click", () => close("confirm"));
+  btnExtra.addEventListener("click", () => close("extra"));
+  btnClose.addEventListener("click", () => close("cancel"));
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) close("cancel");
+  });
+  document.addEventListener("keydown", (e) => {
+    if (!overlay.classList.contains("open")) return;
+    if (e.key === "Escape") close("cancel");
+  });
+
+  window.dialogOpen = open;
+</script>

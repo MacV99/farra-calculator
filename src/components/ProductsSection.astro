@@ -1,0 +1,402 @@
+---
+
+---
+
+<section class="card" aria-labelledby="productos-title">
+  <div class="head-row">
+    <h2 id="productos-title">Productos</h2>
+    <button type="button" id="btn-abrir-modal" class="btn">Agregar</button>
+  </div>
+
+  <div id="productos-wrapper">
+    <table class="tabla" id="tabla-productos">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Precio/u</th>
+          <th>Cantidad</th>
+          <th>% Alc</th>
+          <th>ml/u</th>
+          <th>Costo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-productos"></tbody>
+    </table>
+    <div id="estado-vacio" class="muted hidden">
+      Aún no hay productos. Agrega el primero para empezar.
+    </div>
+  </div>
+
+  <div id="modal-overlay" class="modal-overlay" aria-hidden="true">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
+      <div class="modal-head">
+        <h3 id="modal-title">Agregar producto</h3>
+        <button
+          type="button"
+          id="modal-cerrar"
+          class="btn secondary small"
+          aria-label="Cerrar"
+        >
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+      <form id="form-producto" class="grid-form" novalidate>
+        <div class="field">
+          <label for="p-nombre">Nombre *</label>
+          <input
+            id="p-nombre"
+            name="nombre"
+            type="text"
+            required
+            placeholder="Ej: Cerveza"
+          />
+        </div>
+        <div class="field">
+          <label for="p-precio">Precio por unidad (COP)</label>
+          <input
+            id="p-precio"
+            name="precio"
+            type="number"
+            min="0"
+            step="1"
+            inputmode="numeric"
+            placeholder="5000"
+          />
+        </div>
+        <div class="field">
+          <label for="p-cantidad">Cantidad (unidades)</label>
+          <input
+            id="p-cantidad"
+            name="cantidad"
+            type="number"
+            min="0"
+            step="1"
+            inputmode="numeric"
+            placeholder="24"
+          />
+        </div>
+        <div class="field">
+          <label for="p-abv">% Alcohol (0–100)</label>
+          <input
+            id="p-abv"
+            name="abv"
+            type="number"
+            min="0"
+            max="100"
+            step="0.1"
+            inputmode="decimal"
+            placeholder="4.5"
+          />
+        </div>
+        <div class="field">
+          <label for="p-ml">ml por unidad</label>
+          <input
+            id="p-ml"
+            name="ml"
+            type="number"
+            min="0"
+            step="1"
+            inputmode="numeric"
+            placeholder="330"
+          />
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn">Agregar</button>
+        </div>
+        <p id="producto-errores" class="error" role="alert" aria-live="polite">
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-edit-overlay" class="modal-overlay" aria-hidden="true">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-edit-title"
+    >
+      <div class="modal-head">
+        <h3 id="modal-edit-title">Editar producto</h3>
+        <button
+          type="button"
+          id="modal-edit-cerrar"
+          class="btn secondary small"
+          aria-label="Cerrar"
+        >
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+      <form id="form-producto-editar" class="grid-form" novalidate>
+        <div class="field">
+          <label for="ep-nombre">Nombre *</label>
+          <input id="ep-nombre" type="text" required />
+        </div>
+        <div class="field">
+          <label for="ep-precio">Precio por unidad (COP)</label>
+          <input
+            id="ep-precio"
+            type="number"
+            min="0"
+            step="1"
+            inputmode="numeric"
+          />
+        </div>
+        <div class="field">
+          <label for="ep-cantidad">Cantidad (unidades)</label>
+          <input
+            id="ep-cantidad"
+            type="number"
+            min="0"
+            step="1"
+            inputmode="numeric"
+          />
+        </div>
+        <div class="field">
+          <label for="ep-abv">% ABV (0–100)</label>
+          <input
+            id="ep-abv"
+            type="number"
+            min="0"
+            max="100"
+            step="0.1"
+            inputmode="decimal"
+          />
+        </div>
+        <div class="field">
+          <label for="ep-ml">ml por unidad</label>
+          <input
+            id="ep-ml"
+            type="number"
+            min="0"
+            step="1"
+            inputmode="numeric"
+          />
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn secondary">Guardar cambios</button>
+        </div>
+        <p id="edit-errores" class="error" role="alert" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script type="module" is:inline>
+  const tbody = document.getElementById("tbody-productos");
+  const vacio = document.getElementById("estado-vacio");
+  const btnAbrir = document.getElementById("btn-abrir-modal");
+  const addOverlay = document.getElementById("modal-overlay");
+  const addClose = document.getElementById("modal-cerrar");
+  const addForm = document.getElementById("form-producto");
+  const errAdd = document.getElementById("producto-errores");
+  const epOverlay = document.getElementById("modal-edit-overlay");
+  const epClose = document.getElementById("modal-edit-cerrar");
+  const epForm = document.getElementById("form-producto-editar");
+  const epNombre = document.getElementById("ep-nombre");
+  const epPrecio = document.getElementById("ep-precio");
+  const epCantidad = document.getElementById("ep-cantidad");
+  const epAbv = document.getElementById("ep-abv");
+  const epMl = document.getElementById("ep-ml");
+  const errEdit = document.getElementById("edit-errores");
+  let editingId = null;
+  let lastFocusSel = null;
+
+  function renderProductos() {
+    const productos = window.App.getProductos();
+    tbody.innerHTML = "";
+    productos.length === 0
+      ? vacio.classList.remove("hidden")
+      : vacio.classList.add("hidden");
+    for (const p of productos) {
+      const tr = document.createElement("tr");
+      tr.dataset.id = p.id;
+      tr.innerHTML = `
+        <td data-label="Nombre"><span class="nombre">${p.nombre}</span></td>
+        <td data-label="Precio/u">${window.App.fmtCOP.format(p.precioUnidadCOP)}</td>
+        <td data-label="Cantidad">${p.cantidad}</td>
+        <td data-label="% Alc.">${p.abv}%</td>
+        <td data-label="ml/u">${p.mlUnidad}</td>
+        <td data-label="Costo">${window.App.fmtCOP.format(p.precioUnidadCOP * p.cantidad)}</td>
+        <td data-label="Acciones">
+          <div class="actions-row">
+            <button type="button" class="btn secondary btn-editar" aria-label="Editar"><i class="bi bi-pen-fill"></i></button>
+            <button type="button" class="btn danger btn-eliminar" aria-label="Eliminar"><i class="bi bi-trash3-fill"></i></button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  function openAdd() {
+    const id = window.App.getEventoActivoId();
+    if (!id) {
+      window.toast("Primero crea un evento");
+      window.dispatchEvent(new CustomEvent("create-event:force"));
+      return;
+    }
+    addOverlay.classList.add("open");
+    addOverlay.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+    document.getElementById("p-nombre").focus();
+  }
+
+  function closeAdd() {
+    addOverlay.classList.remove("open");
+    addOverlay.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+    errAdd.textContent = "";
+    for (const id of ["p-nombre", "p-precio", "p-cantidad", "p-abv", "p-ml"])
+      document.getElementById(id).value = "";
+    btnAbrir.focus();
+  }
+
+  function openEdit(id) {
+    editingId = id;
+    lastFocusSel = `tr[data-id="${id}"] .btn-editar`;
+    const p = window.App.getProductos().find((x) => x.id === id);
+    if (!p) return;
+    epNombre.value = p.nombre;
+    epPrecio.value = String(p.precioUnidadCOP);
+    epCantidad.value = String(p.cantidad);
+    epAbv.value = String(p.abv);
+    epMl.value = String(p.mlUnidad);
+    errEdit.textContent = "";
+    epOverlay.classList.add("open");
+    epOverlay.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+    epNombre.focus();
+  }
+
+  function closeEdit() {
+    epOverlay.classList.remove("open");
+    epOverlay.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+    errEdit.textContent = "";
+    if (lastFocusSel) document.querySelector(lastFocusSel)?.focus();
+    editingId = null;
+    lastFocusSel = null;
+  }
+
+  btnAbrir.addEventListener("click", openAdd);
+  addClose.addEventListener("click", closeAdd);
+  addOverlay.addEventListener("click", (e) => {
+    if (e.target === addOverlay) closeAdd();
+  });
+  addForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const nombre = document.getElementById("p-nombre").value.trim();
+    const precio = Number(document.getElementById("p-precio").value || 0);
+    const cantidad = Number(document.getElementById("p-cantidad").value || 0);
+    const abv = Number(document.getElementById("p-abv").value || 0);
+    const ml = Number(document.getElementById("p-ml").value || 0);
+    if (!nombre) {
+      errAdd.textContent = "El nombre es obligatorio.";
+      return;
+    }
+    if (
+      precio < 0 ||
+      cantidad < 0 ||
+      ml < 0 ||
+      abv < 0 ||
+      abv > 100 ||
+      [precio, cantidad, ml, abv].some(Number.isNaN)
+    ) {
+      errAdd.textContent =
+        "Revisa valores: no negativos, sin NaN y %ABV ≤ 100.";
+      return;
+    }
+    window.App.addProducto({
+      id: window.App.uuid(),
+      nombre,
+      precioUnidadCOP: precio,
+      cantidad,
+      abv,
+      mlUnidad: ml,
+    });
+    renderProductos();
+    window.dispatchEvent(new CustomEvent("app:state"));
+    window.toast("Guardado");
+    closeAdd();
+  });
+
+  epClose.addEventListener("click", closeEdit);
+  epOverlay.addEventListener("click", (e) => {
+    if (e.target === epOverlay) closeEdit();
+  });
+  epForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!editingId) return;
+    const nombre = epNombre.value.trim();
+    const precio = Number(epPrecio.value || 0);
+    const cantidad = Number(epCantidad.value || 0);
+    const abv = Number(epAbv.value || 0);
+    const ml = Number(epMl.value || 0);
+    if (!nombre) {
+      errEdit.textContent = "El nombre es obligatorio.";
+      return;
+    }
+    if (
+      precio < 0 ||
+      cantidad < 0 ||
+      ml < 0 ||
+      abv < 0 ||
+      abv > 100 ||
+      [precio, cantidad, ml, abv].some(Number.isNaN)
+    ) {
+      errEdit.textContent =
+        "Revisa valores: no negativos, sin NaN y %ABV ≤ 100.";
+      return;
+    }
+    window.App.updateProducto(editingId, {
+      nombre,
+      precioUnidadCOP: precio,
+      cantidad,
+      abv,
+      mlUnidad: ml,
+    });
+    renderProductos();
+    window.dispatchEvent(new CustomEvent("app:state"));
+    window.toast("Guardado");
+    closeEdit();
+  });
+
+  tbody.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    const tr = btn.closest("tr");
+    if (!tr) return;
+    const id = tr.dataset.id;
+    if (btn.classList.contains("btn-eliminar")) {
+      const res = await window.dialogOpen({
+        title: "Eliminar producto",
+        message: "¿Seguro que quieres eliminar este producto?",
+        confirmText: "Eliminar",
+      });
+      if (res !== "confirm") return;
+      window.App.removeProducto(id);
+      renderProductos();
+      window.dispatchEvent(new CustomEvent("app:state"));
+      window.toast("Eliminado");
+      return;
+    }
+    if (btn.classList.contains("btn-editar")) {
+      openEdit(id);
+      return;
+    }
+  });
+
+  function onAppState() {
+    renderProductos();
+  }
+
+  window.addEventListener("app:state", onAppState);
+  window.addEventListener("DOMContentLoaded", renderProductos);
+</script>

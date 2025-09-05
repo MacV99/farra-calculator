@@ -1,0 +1,190 @@
+---
+
+---
+
+<section class="card" aria-labelledby="evento-nombre-heading">
+  <div class="head-row">
+    <h2 id="evento-nombre-heading">Borrador sin guardar</h2>
+    <button
+      type="button"
+      id="btn-rename-event"
+      class="btn small secondary"
+      title="Renombrar"
+    >
+      <i class="bi bi-pencil-square"></i>
+    </button>
+  </div>
+
+  <form id="form-personas" class="form-row" novalidate>
+    <div class="field">
+      <label for="personas">Número de personas</label>
+      <input
+        id="personas"
+        name="personas"
+        type="number"
+        inputmode="numeric"
+        min="1"
+        step="1"
+        required
+      />
+    </div>
+    <button type="button" id="btn-limpiar" class="btn secondary"
+      >Limpiar todo</button
+    >
+  </form>
+
+  <div id="modal-rename-overlay" class="modal-overlay" aria-hidden="true">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-rename-title"
+    >
+      <div class="modal-head">
+        <h3 id="modal-rename-title">Renombrar evento</h3>
+        <button
+          type="button"
+          id="modal-rename-cerrar"
+          class="btn secondary small"
+          aria-label="Cerrar"
+        >
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+      <form id="form-evento-rename" class="grid-form" novalidate>
+        <div class="field">
+          <label for="rn-nombre">Nuevo nombre</label>
+          <input id="rn-nombre" type="text" placeholder="Mi evento" />
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn secondary">Guardar</button>
+        </div>
+        <p id="rename-errores" class="error" role="alert" aria-live="polite">
+        </p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script type="module" is:inline>
+  const h2 = document.getElementById("evento-nombre-heading");
+  const inputPersonas = document.getElementById("personas");
+  const btnLimpiar = document.getElementById("btn-limpiar");
+  const btnRename = document.getElementById("btn-rename-event");
+  const overlay = document.getElementById("modal-rename-overlay");
+  const btnClose = document.getElementById("modal-rename-cerrar");
+  const formRename = document.getElementById("form-evento-rename");
+  const rnNombre = document.getElementById("rn-nombre");
+  const rnErr = document.getElementById("rename-errores");
+
+  function renderTitle() {
+    const evts = window.App.loadEventos();
+    const id = window.App.getEventoActivoId();
+    const actual = evts.find((e) => e.id === id);
+    h2.textContent = actual
+      ? actual.nombreEvento || "(Sin evento)"
+      : "Borrador sin guardar";
+  }
+
+  function renderPersonas() {
+    inputPersonas.value = String(window.App.getPersonas());
+  }
+
+  function openRename() {
+    const evts = window.App.loadEventos();
+    const id = window.App.getEventoActivoId();
+    if (!id) {
+      window.toast("Primero crea un evento");
+      window.dispatchEvent(new CustomEvent("create-event:force"));
+      return;
+    }
+    const evt = evts.find((e) => e.id === id);
+    rnNombre.value = evt?.nombreEvento || "";
+    rnErr.textContent = "";
+    overlay.classList.add("open");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+    rnNombre.focus();
+  }
+
+  function closeRename() {
+    overlay.classList.remove("open");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+    btnRename.focus();
+  }
+
+  inputPersonas.addEventListener("input", () => {
+    const id = window.App.getEventoActivoId();
+    if (!id) {
+      inputPersonas.value = String(window.App.getPersonas());
+      window.toast("Primero crea un evento");
+      window.dispatchEvent(new CustomEvent("create-event:force"));
+      return;
+    }
+    const val = Math.max(1, parseInt(inputPersonas.value, 10) || 1);
+    window.App.setPersonas(val);
+    window.dispatchEvent(new CustomEvent("app:state"));
+  });
+
+  btnLimpiar.addEventListener("click", async () => {
+    const id = window.App.getEventoActivoId();
+    if (!id) {
+      window.toast("Primero crea un evento");
+      window.dispatchEvent(new CustomEvent("create-event:force"));
+      return;
+    }
+    const res = await window.dialogOpen({
+      title: "Limpiar todo",
+      message:
+        "Esto limpiará personas y productos actuales (no borra los eventos guardados).",
+      confirmText: "Sí, limpiar",
+    });
+    if (res !== "confirm") return;
+    window.App.setPersonas(1);
+    window.App.setProductos([]);
+    renderPersonas();
+    window.dispatchEvent(new CustomEvent("app:state"));
+    window.toast("Limpio");
+  });
+
+  btnRename.addEventListener("click", openRename);
+  btnClose.addEventListener("click", closeRename);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeRename();
+  });
+  formRename.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const id = window.App.getEventoActivoId();
+    if (!id) return;
+    const nombre = rnNombre.value.trim();
+    if (!nombre.length) {
+      rnErr.textContent = "Ingresa un nombre.";
+      return;
+    }
+    const evts = window.App.loadEventos();
+    const idx = evts.findIndex((ev) => ev.id === id);
+    if (idx === -1) {
+      closeRename();
+      return;
+    }
+    evts[idx] = { ...evts[idx], nombreEvento: nombre };
+    window.App.saveEventos(evts);
+    renderTitle();
+    window.dispatchEvent(new CustomEvent("event:list"));
+    window.toast("Nombre actualizado");
+    closeRename();
+  });
+
+  function onAppState() {
+    renderTitle();
+    renderPersonas();
+  }
+
+  window.addEventListener("app:event", renderTitle);
+  window.addEventListener("app:state", onAppState);
+  window.addEventListener("DOMContentLoaded", () => {
+    renderTitle();
+    renderPersonas();
+  });
+</script>
