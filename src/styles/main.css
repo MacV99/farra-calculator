@@ -185,9 +185,9 @@ input:focus {
 }
 
 .btn.success {
-  border: 1px solid #2ecc7040;
-  background-color: #2ecc7005;
-  color: var(--accent-2)
+  background: none;
+  color: #ff4d50;
+  border: 1px solid #ff4d5040
 }
 
 .btn.danger {
