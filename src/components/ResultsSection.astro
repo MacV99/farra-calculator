@@ -3,18 +3,39 @@
 ---
 
 <section class="card" aria-labelledby="resultados-title">
-  <h2 id="resultados-title">Resultados</h2>
+  <div class="head-row">
+    <h2 id="resultados-title">Resultados</h2>
+    <div class="actions-row">
+      <button type="button" id="btn-copiar" class="btn small secondary" title="Copiar resumen">
+        <i class="bi bi-clipboard"></i>
+      </button>
+      <button type="button" id="btn-exportar" class="btn small secondary" title="Generar PDF">
+        <i class="bi bi-file-earmark-arrow-down"></i>
+      </button>
+    </div>
+  </div>
   <div id="resultado" class="resultado" aria-live="polite"></div>
 </section>
 
 <script type="module" is:inline>
   const el = document.getElementById("resultado");
   const live = document.getElementById("live-region");
+
+  function nivelEbriedad(ml) {
+    if (ml <= 0) return { label: "Sobrio", emoji: "😐", color: "#a7b0c0", pct: 0 };
+    if (ml <= 30) return { label: "Leve", emoji: "🙂", color: "#2ecc71", pct: 20 };
+    if (ml <= 60) return { label: "Moderado", emoji: "😊", color: "#3aa8ff", pct: 40 };
+    if (ml <= 100) return { label: "Alto", emoji: "😵", color: "#f39c12", pct: 60 };
+    if (ml <= 150) return { label: "Muy alto", emoji: "🤢", color: "#ff4d4f", pct: 80 };
+    return { label: "Extremo", emoji: "☠️", color: "#ff1744", pct: 100 };
+  }
+
   function render() {
     const res = window.App.calcularResumen(
       window.App.getPersonas(),
       window.App.getProductos(),
     );
+    const nivel = nivelEbriedad(res.alcoholPuroPorPersonaMl);
     el.innerHTML = `
       <div class="box">
         <strong>Costos</strong>
@@ -30,9 +51,158 @@
         <strong>Volumen total</strong>
         <div class="line"><span class="label">Total</span><span>${res.volumenTotalMl} ml · ${res.volumenTotalL} L</span></div>
       </div>
+      <div class="box">
+        <strong>Nivel de ebriedad por persona</strong>
+        <div class="nivel-indicator">
+          <div class="nivel-bar-track">
+            <div class="nivel-bar-fill" style="width:${nivel.pct}%; background:${nivel.color}"></div>
+          </div>
+          <div class="nivel-label" style="color:${nivel.color}">
+            <span class="nivel-emoji">${nivel.emoji}</span>
+            <span>${nivel.label}</span>
+            <span class="muted">(${res.alcoholPuroPorPersonaMl} ml alcohol puro/persona)</span>
+          </div>
+        </div>
+      </div>
     `;
     live.textContent = `Actualizado: total ${window.App.fmtCOP.format(res.costoTotalCOP)}, por persona ${window.App.fmtCOP.format(res.costoPorPersonaCOP)}, alcohol por persona ${res.alcoholPuroPorPersonaMl} ml.`;
   }
+
+  function getEventName() {
+    const evts = window.App.loadEventos();
+    const id = window.App.getEventoActivoId();
+    const evento = evts.find(e => e.id === id);
+    return evento?.nombreEvento || "Sin nombre";
+  }
+
+  function buildSummary() {
+    const App = window.App;
+    const personas = App.getPersonas();
+    const productos = App.getProductos();
+    const res = App.calcularResumen(personas, productos);
+    const nivel = nivelEbriedad(res.alcoholPuroPorPersonaMl);
+
+    let text = `=== FARRA CALCULATOR ===\n`;
+    text += `Evento: ${getEventName()}\n`;
+    text += `Personas: ${personas}\n\n`;
+
+    text += `--- Productos ---\n`;
+    if (productos.length === 0) {
+      text += `(Sin productos)\n`;
+    } else {
+      productos.forEach((p, i) => {
+        const costo = p.precioUnidadCOP * p.cantidad;
+        text += `${i + 1}. ${p.nombre}\n`;
+        text += `   Precio/u: ${App.fmtCOP.format(p.precioUnidadCOP)} | Cantidad: ${p.cantidad} | ABV: ${p.abv}% | ml/u: ${p.mlUnidad} | Costo: ${App.fmtCOP.format(costo)}\n`;
+      });
+    }
+
+    text += `\n--- Resumen ---\n`;
+    text += `Costo total: ${App.fmtCOP.format(res.costoTotalCOP)}\n`;
+    text += `Costo por persona: ${App.fmtCOP.format(res.costoPorPersonaCOP)}\n`;
+    text += `Alcohol puro total: ${res.alcoholPuroTotalMl} ml\n`;
+    text += `Alcohol puro por persona: ${res.alcoholPuroPorPersonaMl} ml\n`;
+    text += `Volumen total: ${res.volumenTotalMl} ml (${res.volumenTotalL} L)\n`;
+    text += `Nivel de ebriedad: ${nivel.emoji} ${nivel.label}\n`;
+
+    return text;
+  }
+
+  // Copy to clipboard
+  document.getElementById("btn-copiar").addEventListener("click", async () => {
+    const text = buildSummary();
+    try {
+      await navigator.clipboard.writeText(text);
+      window.toast("Copiado al portapapeles");
+    } catch {
+      window.toast("No se pudo copiar");
+    }
+  });
+
+  // Export PDF
+  document.getElementById("btn-exportar").addEventListener("click", () => {
+    const App = window.App;
+    const personas = App.getPersonas();
+    const productos = App.getProductos();
+    const res = App.calcularResumen(personas, productos);
+    const nivel = nivelEbriedad(res.alcoholPuroPorPersonaMl);
+    const nombreEvento = getEventName();
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let y = 20;
+
+    // Title
+    doc.setFontSize(18);
+    doc.text("Farra Calculator", 105, y, { align: "center" });
+    y += 10;
+
+    // Event info
+    doc.setFontSize(12);
+    doc.text(`Evento: ${nombreEvento}`, 20, y);
+    y += 7;
+    doc.text(`Personas: ${personas}`, 20, y);
+    y += 12;
+
+    // Products table header
+    doc.setFontSize(13);
+    doc.text("Productos", 20, y);
+    y += 8;
+
+    if (productos.length === 0) {
+      doc.setFontSize(10);
+      doc.text("(Sin productos)", 20, y);
+      y += 8;
+    } else {
+      doc.setFontSize(9);
+      // Header row
+      const cols = ["Nombre", "Precio/u", "Cant.", "ABV%", "ml/u", "Costo"];
+      const colX = [20, 65, 100, 120, 140, 160];
+      doc.setFont(undefined, "bold");
+      cols.forEach((col, i) => doc.text(col, colX[i], y));
+      doc.setFont(undefined, "normal");
+      y += 2;
+      doc.line(20, y, 190, y);
+      y += 5;
+
+      productos.forEach((p) => {
+        if (y > 270) { doc.addPage(); y = 20; }
+        const costo = p.precioUnidadCOP * p.cantidad;
+        doc.text(p.nombre.substring(0, 20), colX[0], y);
+        doc.text(App.fmtCOP.format(p.precioUnidadCOP), colX[1], y);
+        doc.text(String(p.cantidad), colX[2], y);
+        doc.text(`${p.abv}%`, colX[3], y);
+        doc.text(String(p.mlUnidad), colX[4], y);
+        doc.text(App.fmtCOP.format(costo), colX[5], y);
+        y += 6;
+      });
+    }
+
+    y += 6;
+
+    // Summary
+    doc.setFontSize(13);
+    doc.text("Resumen", 20, y);
+    y += 8;
+    doc.setFontSize(10);
+
+    const lines = [
+      `Costo total: ${App.fmtCOP.format(res.costoTotalCOP)}`,
+      `Costo por persona: ${App.fmtCOP.format(res.costoPorPersonaCOP)}`,
+      `Alcohol puro total: ${res.alcoholPuroTotalMl} ml`,
+      `Alcohol puro por persona: ${res.alcoholPuroPorPersonaMl} ml`,
+      `Volumen total: ${res.volumenTotalMl} ml (${res.volumenTotalL} L)`,
+      `Nivel de ebriedad: ${nivel.label}`,
+    ];
+    lines.forEach((line) => {
+      doc.text(line, 20, y);
+      y += 6;
+    });
+
+    doc.save("farra-resumen.pdf");
+    window.toast("PDF generado");
+  });
+
   window.addEventListener("app:state", render);
   window.addEventListener("DOMContentLoaded", render);
 </script>
