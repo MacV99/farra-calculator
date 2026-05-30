@@ -3,7 +3,39 @@ const { title = "Farra Calculator" } = Astro.props;
 ---
 
 <header class="hero">
-  <div class="container">
+  <div class="container hero-row">
     <h1>{title}</h1>
+    <button type="button" id="btn-instalar" class="btn small secondary hidden">
+      <i class="bi bi-download"></i> Instalar app
+    </button>
   </div>
 </header>
+
+<script type="module" is:inline>
+  const btn = document.getElementById("btn-instalar");
+  let deferredPrompt = null;
+
+  const esStandalone =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true;
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (!esStandalone) btn.classList.remove("hidden");
+  });
+
+  btn.addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    btn.classList.add("hidden");
+    if (outcome === "accepted" && window.toast) window.toast("Instalando…");
+  });
+
+  window.addEventListener("appinstalled", () => {
+    btn.classList.add("hidden");
+    if (window.toast) window.toast("App instalada");
+  });
+</script>

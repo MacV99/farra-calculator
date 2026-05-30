@@ -1,0 +1,26 @@
+{
+  "name": "Farra Calculator",
+  "short_name": "Farra",
+  "description": "Calcula costos y consumo de alcohol puro por persona. Guarda tus eventos y cárgalos cuando quieras.",
+  "lang": "es",
+  "theme_color": "#0f1115",
+  "background_color": "#0f1115",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

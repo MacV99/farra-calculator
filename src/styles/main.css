@@ -506,3 +506,24 @@ header .container {
 .nivel-emoji {
   font-size: 1.3rem;
 }
+
+/* Header con botón de instalar PWA */
+.hero-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Preview de la imagen exportada */
+.export-preview {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 60vh;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin: 0 0 12px 0;
+}
