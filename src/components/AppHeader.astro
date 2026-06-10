@@ -5,13 +5,50 @@ const { title = "Farra Calculator" } = Astro.props;
 <header class="hero">
   <div class="container hero-row">
     <h1>{title}</h1>
-    <button type="button" id="btn-instalar" class="btn small secondary hidden">
-      <i class="bi bi-download"></i> Instalar app
-    </button>
+    <div class="hero-actions">
+      <button
+        type="button"
+        id="btn-tema"
+        class="btn small secondary"
+        aria-label="Cambiar tema"
+        title="Cambiar tema"
+      >
+        <i class="bi bi-moon-stars"></i>
+      </button>
+      <button type="button" id="btn-instalar" class="btn small secondary hidden">
+        <i class="bi bi-download"></i> Instalar app
+      </button>
+    </div>
   </div>
 </header>
 
 <script type="module" is:inline>
+  // ---- Toggle tema claro/oscuro ----
+  const btnTema = document.getElementById("btn-tema");
+  const iconTema = btnTema.querySelector("i");
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+
+  function aplicarTema(tema) {
+    document.documentElement.setAttribute("data-theme", tema);
+    const esOscuro = tema === "dark";
+    iconTema.className = esOscuro ? "bi bi-sun" : "bi bi-moon-stars";
+    btnTema.title = esOscuro ? "Modo claro" : "Modo oscuro";
+    if (metaTheme) metaTheme.setAttribute("content", esOscuro ? "#111317" : "#f6f7f9");
+  }
+
+  // Estado inicial: el <html> ya tiene data-theme puesto por el script anti-flash
+  aplicarTema(document.documentElement.getAttribute("data-theme") || "light");
+
+  btnTema.addEventListener("click", () => {
+    const actual = document.documentElement.getAttribute("data-theme") || "light";
+    const siguiente = actual === "dark" ? "light" : "dark";
+    aplicarTema(siguiente);
+    try {
+      localStorage.setItem("fiesta.tema", siguiente);
+    } catch {}
+  });
+
+  // ---- Instalar PWA ----
   const btn = document.getElementById("btn-instalar");
   let deferredPrompt = null;
 

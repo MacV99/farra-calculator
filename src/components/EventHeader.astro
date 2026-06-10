@@ -87,6 +87,8 @@
   }
 
   function renderPersonas() {
+    // No pisar lo que el usuario está escribiendo
+    if (document.activeElement === inputPersonas) return;
     inputPersonas.value = String(window.App.getPersonas());
   }
 
@@ -122,9 +124,28 @@
       window.dispatchEvent(new CustomEvent("create-event:force"));
       return;
     }
-    const val = Math.max(1, parseInt(inputPersonas.value, 10) || 1);
-    window.App.setPersonas(val);
+    const raw = inputPersonas.value.trim();
+    if (raw === "") return; // dejar borrar para escribir otro número
+    const n = parseInt(raw, 10);
+    if (Number.isNaN(n) || n < 1) return; // 0 o negativo → validar al salir (blur)
+    window.App.setPersonas(n);
     window.dispatchEvent(new CustomEvent("app:state"));
+  });
+
+  inputPersonas.addEventListener("blur", async () => {
+    const id = window.App.getEventoActivoId();
+    if (!id) return;
+    const n = parseInt(inputPersonas.value, 10);
+    if (Number.isNaN(n) || n < 1) {
+      await window.dialogOpen({
+        title: "Número inválido",
+        message: "El número de personas debe ser al menos 1. Se ajustará a 1.",
+        confirmText: "Entendido",
+      });
+      window.App.setPersonas(1);
+      renderPersonas();
+      window.dispatchEvent(new CustomEvent("app:state"));
+    }
   });
 
   btnLimpiar.addEventListener("click", async () => {

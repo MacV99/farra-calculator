@@ -54,7 +54,7 @@
   function nivelEbriedad(ml) {
     if (ml <= 0) return { label: "Sobrio", emoji: "😐", color: "#a7b0c0", pct: 0 };
     if (ml <= 30) return { label: "Leve", emoji: "🙂", color: "#2ecc71", pct: 20 };
-    if (ml <= 60) return { label: "Moderado", emoji: "😊", color: "#3aa8ff", pct: 40 };
+    if (ml <= 60) return { label: "Moderado", emoji: "😊", color: "#0050a5", pct: 40 };
     if (ml <= 100) return { label: "Alto", emoji: "😵", color: "#f39c12", pct: 60 };
     if (ml <= 150) return { label: "Muy alto", emoji: "🤢", color: "#ff4d4f", pct: 80 };
     return { label: "Extremo", emoji: "☠️", color: "#ff1744", pct: 100 };
@@ -66,12 +66,10 @@
       window.App.getProductos(),
     );
     const nivel = nivelEbriedad(res.alcoholPuroPorPersonaMl);
-    el.innerHTML = `
-      <div class="box">
-        <strong>Costos</strong>
-        <div class="line"><span class="label">Total</span><span>${window.App.fmtCOP.format(res.costoTotalCOP)}</span></div>
-        <div class="line"><span class="label">Por persona</span><span>${window.App.fmtCOP.format(res.costoPorPersonaCOP)}</span></div>
-      </div>
+    const hayAlcohol = res.alcoholPuroTotalMl > 0;
+    const bloqueAlcohol = !hayAlcohol
+      ? ""
+      : `
       <div class="box">
         <strong>Alcohol puro</strong>
         <div class="line"><span class="label">Total</span><span>${res.alcoholPuroTotalMl} ml</span></div>
@@ -93,7 +91,13 @@
             <span class="muted">(${res.alcoholPuroPorPersonaMl} ml alcohol puro/persona)</span>
           </div>
         </div>
-      </div>
+      </div>`;
+    el.innerHTML = `
+      <div class="box">
+        <strong>Costos</strong>
+        <div class="line"><span class="label">Total</span><span>${window.App.fmtCOP.format(res.costoTotalCOP)}</span></div>
+        <div class="line"><span class="label">Por persona</span><span>${window.App.fmtCOP.format(res.costoPorPersonaCOP)}</span></div>
+      </div>${bloqueAlcohol}
     `;
     live.textContent = `Actualizado: total ${window.App.fmtCOP.format(res.costoTotalCOP)}, por persona ${window.App.fmtCOP.format(res.costoPorPersonaCOP)}, alcohol por persona ${res.alcoholPuroPorPersonaMl} ml.`;
   }
@@ -181,9 +185,15 @@
     const scale = 2; // nitidez retina
     const W = 560;
     const PAD = 32;
+    // Leer la paleta del tema actual (claro/oscuro)
+    const cs = getComputedStyle(document.documentElement);
+    const v = (n, fallback) => (cs.getPropertyValue(n).trim() || fallback);
     const C = {
-      bg: "#0f1115", card: "#171a21", text: "#e8ebf1",
-      muted: "#a7b0c0", border: "#232735",
+      bg: v("--card", "#ffffff"),
+      card: v("--panel", "#f0f2f5"),
+      text: v("--text", "#1a1d21"),
+      muted: v("--muted", "#6b7280"),
+      border: v("--border", "#e2e5ea"),
     };
 
     // Medir altura necesaria (personas siempre es >= 1)
@@ -343,7 +353,7 @@
     y += 16;
     const barW = xRight - x;
     roundRect(x, y, barW, 10, 5);
-    ctx.fillStyle = "#0c0f14";
+    ctx.fillStyle = "#e3ecf6";
     ctx.fill();
     if (nivel.pct > 0) {
       roundRect(x, y, Math.max(10, (barW * nivel.pct) / 100), 10, 5);

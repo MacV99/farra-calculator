@@ -1,18 +1,37 @@
 :root {
-  --bg: #0f1115;
-  --card: #171a21;
-  --text: #e8ebf1;
-  --muted: #a7b0c0;
-  --accent: #3aa8ff;
-  --accent-2: #2ecc71;
-  --danger: #ff4d4f;
-  --border: #232735;
-  --shadow: 0 8px 24px rgba(0, 0, 0, .25);
+  color-scheme: light;
+  /* Base: escala de grises */
+  --bg: #f6f7f9;
+  --card: #ffffff;
+  --panel: #f0f2f5;
+  --text: #1a1d21;
+  --muted: #6b7280;
+  --border: #e2e5ea;
+  --shadow: 0 8px 24px rgba(20, 24, 31, .08);
+  /* Accents (los colores de marca, solo para detalles) */
+  --accent: #f02b3d;
+  --accent-2: #0050a5;
+  --danger: #f02b3d;
   --radius: 16px;
   --maxw: 1200px;
   --gap: 16px;
   --col-personas: calc(28% - var(--gap)/2);
   --col-productos: calc(72% - var(--gap)/2);
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111317;
+  --card: #1a1d22;
+  --panel: #23272e;
+  --text: #eceef2;
+  --muted: #98a1ad;
+  --border: #2d323a;
+  --shadow: 0 8px 24px rgba(0, 0, 0, .45);
+  /* Accents un poco más claros para contraste en oscuro */
+  --accent: #ff4d5e;
+  --accent-2: #5fa0ff;
+  --danger: #ff4d5e;
 }
 
 * {
@@ -27,7 +46,7 @@ body {
 body {
   margin: 0;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Arial, "Noto Sans";
-  background: linear-gradient(180deg, #0c0f14 0%, #0f1115 100%);
+  background: var(--bg);
   color: var(--text);
   line-height: 1.4;
 }
@@ -45,10 +64,10 @@ body.modal-open {
 
 .hero {
   border-bottom: 1px solid var(--border);
-  background: radial-gradient(1200px 300px at 50% -50%, rgba(58, 168, 255, .15), transparent 60%)
 }
 
 .hero h1 {
+  color: var(--accent-2);
   margin: 0 0 4px 0;
   font-size: 1.75rem
 }
@@ -59,9 +78,9 @@ body.modal-open {
 }
 
 #btn-limpiar {
-  color: var(--danger);
-  border-color: #ff4d5040;
-  background-color: #ff4d5005
+  color: #fff;
+  border-color: var(--danger);
+  background-color: var(--danger)
 }
 
 .grid {
@@ -134,7 +153,7 @@ label {
 }
 
 input {
-  background: #0e1117;
+  background: var(--panel);
   border: 1px solid var(--border);
   color: var(--text);
   border-radius: 12px;
@@ -143,9 +162,13 @@ input {
   min-width: 0;
 }
 
+input::placeholder {
+  color: var(--muted)
+}
+
 input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(58, 168, 255, .2)
+  box-shadow: 0 0 0 2px rgba(240, 43, 61, .45)
 }
 
 .grid-form {
@@ -166,9 +189,9 @@ input:focus {
 }
 
 .btn {
-  background-color: #e8ebf105;
-  border: 1px solid #e8ebf140;
-  color: var(--text);
+  background-color: var(--accent-2);
+  border: 1px solid var(--accent-2);
+  color: #fff;
   font-weight: 700;
   padding: 10px 14px;
   border-radius: 12px;
@@ -180,20 +203,21 @@ input:focus {
 }
 
 .btn.secondary {
-  border: 1px solid #e8ebf140;
-  background-color: #e8ebf105
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text)
 }
 
 .btn.success {
-  background: none;
-  color: #ff4d50;
-  border: 1px solid #ff4d5040
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent)
 }
 
 .btn.danger {
-  background: none;
-  color: #ff4d50;
-  border: 1px solid #ff4d5040
+  background: var(--card);
+  color: var(--danger);
+  border: 1px solid var(--danger)
 }
 
 .btn.small {
@@ -233,14 +257,14 @@ input:focus {
 }
 
 .tabla thead th {
-  background: #0e1117;
+  background: var(--panel);
   position: sticky;
   top: 0;
   z-index: 1
 }
 
 .tabla tbody tr:nth-child(odd) {
-  background: rgba(255, 255, 255, .02)
+  background: var(--panel)
 }
 
 .actions-row {
@@ -298,7 +322,7 @@ input:focus {
 }
 
 .resultado .box {
-  background: #0e1117;
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 10px 14px
@@ -348,7 +372,7 @@ strong {
   border: 1px solid var(--border);
   border-radius: 12px;
   margin-top: 8px;
-  background: #0e1117;
+  background: var(--panel);
   transition: border-color .15s, box-shadow .15s, background .15s
 }
 
@@ -363,8 +387,8 @@ strong {
 }
 
 .evento-item.active {
-  border-color: #e8ebf185;
-  background: #e8ebf102
+  border-color: var(--accent);
+  background: rgba(240, 43, 61, .15)
 }
 
 .modal-overlay {
@@ -396,7 +420,7 @@ header .container {
 
 .modal {
   width: min(680px, 100%);
-  background: #12151c;
+  background: var(--card);
   border: 1px solid var(--border);
   border-radius: 16px;
   box-shadow: var(--shadow);
@@ -440,7 +464,7 @@ header .container {
   position: fixed;
   right: 16px;
   bottom: 16px;
-  background: #12151c;
+  background: var(--card);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 10px 12px;
@@ -482,7 +506,7 @@ header .container {
 .nivel-bar-track {
   width: 100%;
   height: 8px;
-  background: #0e1117;
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 4px;
   overflow: hidden;
@@ -516,6 +540,12 @@ header .container {
   flex-wrap: wrap;
 }
 
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* Preview de la imagen exportada */
 .export-preview {
   display: block;
@@ -526,4 +556,161 @@ header .container {
   border-radius: 12px;
   border: 1px solid var(--border);
   margin: 0 0 12px 0;
+}
+
+.grid-form .field-check {
+  flex: 1 1 100%;
+  margin-top: 2px
+}
+
+.check-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  cursor: pointer;
+  font-weight: 600;
+  user-select: none;
+  transition: border-color .18s ease, background .18s ease
+}
+
+.check-label:hover {
+  border-color: var(--accent-2)
+}
+
+.check-label:has(input:checked) {
+  border-color: var(--accent);
+  background: rgba(240, 43, 61, .12)
+}
+
+.check-text {
+  display: flex;
+  align-items: center;
+  gap: 8px
+}
+
+.check-text i {
+  color: var(--accent-2);
+  font-size: 1.1rem
+}
+
+/* Switch construido sobre el checkbox nativo (sin HTML extra) */
+.check-label input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex: none;
+  width: 46px;
+  height: 26px;
+  margin: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 40%, transparent);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .2s ease, border-color .2s ease
+}
+
+.check-label input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 24, .5);
+  transition: transform .2s ease
+}
+
+.check-label input[type="checkbox"]:checked {
+  background: var(--accent);
+  border-color: var(--accent)
+}
+
+.check-label input[type="checkbox"]:checked::before {
+  transform: translateX(20px)
+}
+
+.check-label input[type="checkbox"]:focus-visible {
+  box-shadow: 0 0 0 3px rgba(240, 43, 61, .35)
+}
+
+/* ===================================================== */
+/* Design polish (frontend-design): tipografía + botones  */
+/* + profundidad. Bloque al final = gana en la cascada.   */
+/* ===================================================== */
+
+body {
+  font-family: "Onest", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif
+}
+
+h1, h2, h3,
+.hero h1,
+#modal-title, #modal-edit-title, #modal-export-title,
+#modal-rename-title, #dialog-title {
+  font-family: "Unbounded", system-ui, sans-serif;
+  letter-spacing: -.01em
+}
+
+.hero h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1.05
+}
+
+h2 {
+  font-weight: 700
+}
+
+/* Botón primario: rojo relleno con realce */
+.btn {
+  background-color: var(--accent);
+  border: 1px solid var(--accent);
+  color: #fff;
+  transition: transform .12s ease, filter .15s ease, box-shadow .15s ease
+}
+
+.btn:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(240, 43, 61, .35)
+}
+
+.btn:active {
+  transform: translateY(0)
+}
+
+/* Secundario: outline translúcido */
+.btn.secondary {
+  background-color: transparent;
+  border: 1px solid var(--border);
+  color: var(--text)
+}
+
+.btn.secondary:hover {
+  background-color: var(--panel);
+  box-shadow: none
+}
+
+/* danger / success: outline, sin sombra roja de primario */
+.btn.danger,
+.btn.success {
+  background: transparent;
+  box-shadow: none
+}
+
+.btn.danger:hover,
+.btn.success:hover {
+  background: rgba(240, 43, 61, .12);
+  box-shadow: none
+}
+
+/* Acento sutil de marca arriba de cada card (theme-safe) */
+.card {
+  border-top: 2px solid color-mix(in srgb, var(--accent) 45%, transparent)
 }
